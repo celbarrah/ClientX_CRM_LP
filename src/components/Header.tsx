@@ -20,8 +20,8 @@ export function Header() {
     >
       <div
         className={cn(
-          "mx-auto flex h-16 max-w-[1240px] items-center justify-between rounded-full pl-5 pr-2 transition-all duration-500",
-          scrolled ? "border border-line bg-canvas/95 shadow-card backdrop-blur-xl backdrop-saturate-150" : "border border-transparent",
+          "mx-auto flex h-16 max-w-[1440px] items-center justify-between rounded-full pl-5 pr-2 transition-all duration-500",
+          scrolled ? "border border-line bg-canvas/95 shadow-card" : "border border-transparent",
         )}
       >
         <a href="#top" aria-label="ClientX AI — accueil">

@@ -9,17 +9,17 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 export function Reveal({
   children,
   delay = 0,
-  y = 24,
+  y = 16,
   className,
   ...rest
 }: HTMLMotionProps<"div"> & { delay?: number; y?: number }) {
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={reduce ? false : { opacity: 0, y, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={reduce ? false : { opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.9, ease: EASE, delay }}
+      transition={{ duration: 0.6, ease: EASE, delay }}
       className={className}
       {...rest}
     >
@@ -37,7 +37,7 @@ export function Eyebrow({ children, dark, className }: { children: React.ReactNo
         className,
       )}
     >
-      <span className="size-1.5 rounded-full bg-brand animate-pulse-dot" />
+      <span className="size-1.5 rounded-full bg-brand" />
       {children}
     </span>
   );

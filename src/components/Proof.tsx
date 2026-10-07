@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { TESTIMONIALS, TRUST, SUPPORT } from "@/lib/content";
+import { TESTIMONIALS, TRUST, SUPPORT, USE_CASES } from "@/lib/content";
+import { SECTOR_ICONS } from "@/components/Archive";
 import { Accent, Eyebrow, Reveal, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,8 @@ export function Proof() {
   const [i, setI] = useState(0);
   const reduce = useReducedMotion();
   const t = TESTIMONIALS[i];
+  const Icon = SECTOR_ICONS[t.sector];
+  const sector = USE_CASES.find((u) => u.key === t.sector)?.sector;
   const go = (d: number) => setI((v) => (v + d + TESTIMONIALS.length) % TESTIMONIALS.length);
 
   useEffect(() => {
@@ -28,7 +31,7 @@ export function Proof() {
           <Eyebrow>Ils en parlent mieux que nous</Eyebrow>
         </Reveal>
 
-        <div className="relative mx-auto mt-10 max-w-4xl text-center">
+        <div className="relative mx-auto mt-24 max-w-4xl text-center sm:mt-28">
           <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 font-serif text-[9rem] leading-none text-brand/40 sm:-top-16 sm:text-[12rem]">
             “
           </span>
@@ -36,19 +39,19 @@ export function Proof() {
             <AnimatePresence mode="wait">
               <motion.figure
                 key={i}
-                initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, y: -12, filter: "blur(6px)" }}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
                 <blockquote className="text-balance font-serif text-[1.9rem] leading-[1.15] sm:text-5xl">{t.quote}</blockquote>
                 <figcaption className="mt-8 flex items-center justify-center gap-3">
-                  <span className="grid size-11 place-items-center rounded-full bg-ink text-sm font-semibold text-brand">
-                    {t.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                  <span className="grid size-11 place-items-center rounded-full bg-ink text-brand">
+                    <Icon className="size-5" strokeWidth={1.7} />
                   </span>
                   <span className="text-left">
-                    <span className="block font-semibold">{t.name}</span>
-                    <span className="block text-sm text-muted">{t.role}</span>
+                    <span className="block font-semibold">{t.role}</span>
+                    <span className="block text-sm text-muted">{sector}</span>
                   </span>
                 </figcaption>
               </motion.figure>

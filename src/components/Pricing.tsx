@@ -25,7 +25,7 @@ export function Pricing() {
               )}
             >
               {p.popular && (
-                <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-2/3 -translate-x-1/2 rounded-full bg-brand/40 blur-[70px]" />
+                <div className="pointer-events-none absolute -top-16 left-1/2 h-40 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.52),transparent)]" />
               )}
               <div className={cn("relative flex flex-1 flex-col rounded-[1.6rem] p-7 sm:p-8", p.popular ? "text-white" : "")}>
                 <div className="flex items-center justify-between">

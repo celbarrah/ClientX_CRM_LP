@@ -53,7 +53,7 @@ export function ToolsVsPlatform() {
             delay={0.15}
             className="grain relative flex flex-col overflow-hidden rounded-[2rem] bg-ink p-6 text-white sm:p-8 lg:col-span-2"
           >
-            <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-brand/30 blur-[90px]" />
+            <div className="pointer-events-none absolute -right-20 -top-20 size-72 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.39),transparent)]" />
             <p className="relative font-mono text-[11px] uppercase tracking-[0.14em] text-brand">Avec ClientX AI</p>
             <Logo dark className="relative mt-5 h-8 self-start" />
             <p className="relative mt-4 text-white/60">Une seule plateforme, pilotée par l'IA.</p>

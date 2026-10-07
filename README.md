@@ -23,16 +23,24 @@ npm run build && npm start   # production
 ## Parcours de conversion
 
 1. **Étape 1** (coordonnées) → validation uniquement, rien n'est envoyé.
-2. **Étape 2** (entreprise, secteur, équipe) → envoi unique au webhook `LEAD_WEBHOOK_URL`.
-3. Message de confirmation affiché dans le formulaire (pas de redirection).
+2. **Étape 2** → envoi unique, en parallèle :
+   - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` (JSON uniquement) pour que le workflow appelle GHL ;
+   - optionnel : `GHL_SEND_DIRECT=true` fait aussi créer le contact dans GHL par le site (tags, note d'attribution, inscription au workflow) — à éviter si le workflow le fait déjà.
+3. Redirection vers `/merci`, qui déclenche la conversion (`generate_lead` dans le dataLayer, `Lead` Meta) — une seule fois par envoi.
 
-Champs envoyés : `first_name, last_name, email, phone, company_name, sector, team_size, source, page, utm_*, gclid, fbclid, submitted_at`.
+**Attribution** : `utm_source, utm_medium, utm_campaign, utm_term, utm_content, utm_id, gclid, gbraid, wbraid, fbclid, msclkid, ttclid` + `landing_page`, `referrer`, `fbp`/`fbc`. Conservés pour la session (le visiteur peut naviguer avant de convertir).
+
+**Événements formulaire** : `form_step_complete` (dataLayer / Google) et `FormStepComplete` (Meta, événement personnalisé) à chaque étape validée — paramètres `form_name`, `form_step` (1 ou 2), `form_step_name` (`coordonnees`, `entreprise`), `form_total_steps`. Une seule fois par étape, aucune donnée personnelle. Puis `generate_lead` / `Lead` sur `/merci`.
+
+**Chat** : bulle LeadConnector via `NEXT_PUBLIC_CHAT_WIDGET_ID` (global) et `NEXT_PUBLIC_CHAT_WIDGET_ID_MA` (visiteurs dont le fuseau horaire est `Africa/Casablanca`). Chargée à la première interaction ou après 3,5 s pour ne pas ralentir l'affichage. Laisser vide pour désactiver.
+
+**Tracking** : `NEXT_PUBLIC_GOOGLE_TAG_ID` accepte un ID GTM (`GTM-…`) ou un Google tag (`G-…` / `AW-…`). `NEXT_PUBLIC_META_PIXEL_ID` charge le Pixel (PageView + Lead). Les variables `NEXT_PUBLIC_*` sont lues au build : relancer `npm run build` après modification.
 
 ## Avant la mise en ligne
 
+- [ ] Bannière de consentement cookies (RGPD/CNIL) avant d'activer GTM et le Pixel Meta.
 - [ ] `LEAD_WEBHOOK_URL` dans les variables d'environnement (Vercel) — utiliser l'URL de production `/webhook/…` et non `/webhook-test/…`.
 - [ ] Remplacer les **témoignages** (marqués PLACEHOLDER dans `content.ts`).
 - [ ] Remplacer les maquettes par les **captures produit**. (Logos clients : `public/clients/`, liste dans `CLIENTS` de `content.ts`.)
 - [ ] Logos SVG ClientX (actuellement PNG dérivés du fichier fourni : `public/logo-dark.png`, `public/logo-white.png`).
 - [ ] Compléter les `[À compléter]` des pages **Mentions légales** et **Politique de confidentialité**, et les faire relire.
-- [ ] Pixels / GA4 / GTM si besoin.

@@ -33,7 +33,7 @@ export const stepTwoSchema = z.object({
 
 const meta = {
   website: z.string().max(0).optional(),
-  utm: z.record(z.string(), z.string()).optional(),
+  utm: z.record(z.string().max(40), z.string().max(600)).optional(),
   page: z.string().optional(),
 };
 

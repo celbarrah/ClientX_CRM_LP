@@ -115,7 +115,7 @@ export function ModulesTabs() {
           <div className="lg:col-span-7">
             <div className="relative overflow-hidden rounded-[2rem] border border-line bg-surface p-6 sm:p-10">
               <div className="pointer-events-none absolute inset-0 bg-paper opacity-80" />
-              <div className="pointer-events-none absolute -bottom-16 left-1/2 h-48 w-2/3 -translate-x-1/2 rounded-full bg-brand/30 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-16 left-1/2 h-48 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.39),transparent)]" />
               <div className="absolute right-5 top-5 z-20">
                 <AnimatePresence mode="wait">
                   <motion.div key={m.key} exit={{ opacity: 0, scale: 0.8 }}>
@@ -129,9 +129,9 @@ export function ModulesTabs() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={m.key}
-                    initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    exit={{ opacity: 0, y: -16, filter: "blur(6px)" }}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.5, ease: EASE }}
                   >
                     <ModuleMock name={m.key} />

@@ -6,9 +6,9 @@ import { Accent, Button, Eyebrow, Logo, Reveal, Sticker } from "@/components/ui"
 export function Footer({ cta = false }: { cta?: boolean }) {
   return (
     <footer className="px-3 pb-3 sm:px-4 sm:pb-4">
-      <div className="grain relative isolate mx-auto max-w-[1400px] overflow-hidden rounded-[2.5rem] bg-ink text-white">
+      <div className="grain relative isolate mx-auto max-w-[1600px] overflow-hidden rounded-[2.5rem] bg-ink text-white">
         <div className="absolute inset-0 -z-10 bg-grid-dark [mask-image:radial-gradient(ellipse_70%_55%_at_50%_0%,black,transparent)]" />
-        <div className="pointer-events-none absolute -top-48 left-1/2 -z-10 h-[420px] w-[900px] max-w-[160vw] -translate-x-1/2 rounded-full bg-brand/20 blur-[120px]" />
+        <div className="pointer-events-none absolute -top-48 left-1/2 -z-10 h-[420px] w-[900px] max-w-[160vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.26),transparent)]" />
 
         {cta && (
           <Reveal className="container-x flex flex-col items-center pb-20 pt-24 text-center sm:pb-28 sm:pt-32">

@@ -228,31 +228,31 @@ export const MODULES: {
   },
 ];
 
-// PLACEHOLDER — replace with real testimonials (name, role, company, photo).
+// PLACEHOLDER quotes — replace with real testimonials. Shown anonymised (role + sector), no client name.
 export const TESTIMONIALS = [
   {
     quote:
       "Nous avons remplacé six abonnements par ClientX AI. Toute l'équipe commerciale travaille enfin dans le même outil.",
-    name: "Nom du client",
-    role: "Directeur commercial · Assurance",
+    role: "Directeur commercial",
+    sector: "assurance" as SectorKey,
   },
   {
     quote:
       "Les rappels automatiques ont presque fait disparaître les rendez-vous manqués. Le gain de temps est énorme.",
-    name: "Nom du client",
-    role: "Gérante · Centre de bien-être",
+    role: "Gérante, centre de bien-être",
+    sector: "bienetre" as SectorKey,
   },
   {
     quote:
       "L'onboarding 1:1 a fait toute la différence : nos premiers workflows tournaient dès la première semaine.",
-    name: "Nom du client",
-    role: "Directrice marketing · École de formation",
+    role: "Directrice marketing, école de formation",
+    sector: "ecoles" as SectorKey,
   },
   {
     quote:
       "Devis, signature et paiement au même endroit : notre cycle de vente s'est considérablement raccourci.",
-    name: "Nom du client",
-    role: "Fondateur · Immobilier",
+    role: "Fondateur, agence immobilière",
+    sector: "immobilier" as SectorKey,
   },
 ];
 
@@ -346,8 +346,8 @@ export const FAQ = [
 ];
 
 export const THANK_YOU_STEPS = [
-  { title: "Confirmation", text: "Vous recevez la confirmation de votre rendez-vous par e-mail et SMS." },
-  { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour préparer votre démo." },
+  { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
+  { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo." },
   { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
 ];
 

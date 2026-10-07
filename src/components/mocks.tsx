@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import {
   BellRing, Bot, Check, CreditCard, FileSignature, GraduationCap, Mail, MessageCircle,
   MessageSquare, MousePointerClick, PlayCircle, Radio, Sparkles, Zap,
@@ -25,7 +25,6 @@ function Window({ title, children, className }: { title: string; children: React
 }
 
 function Float({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const reduce = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16, scale: 0.95 }}
@@ -34,13 +33,11 @@ function Float({ children, className, delay = 0 }: { children: React.ReactNode; 
       transition={{ duration: 0.8, delay: 0.3 + delay, ease: [0.22, 1, 0.36, 1] }}
       className={cn("absolute z-10", className)}
     >
-      <motion.div
-        animate={reduce ? undefined : { y: [0, -6, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
-        className="flex items-center gap-2.5 rounded-xl border border-line bg-canvas/95 px-3.5 py-2.5 text-[13px] font-medium shadow-float backdrop-blur"
+      <div
+        className="flex items-center gap-2.5 rounded-xl border border-line bg-canvas/95 px-3.5 py-2.5 text-[13px] font-medium shadow-float"
       >
         {children}
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -290,7 +287,6 @@ function CloseMock() {
 }
 
 function AutomateMock() {
-  const reduce = useReducedMotion();
   const nodes = [
     { icon: Zap, t: "Déclencheur", d: "Formulaire soumis", tone: "ink" },
     { icon: Bot, t: "Agent IA", d: "Qualifie le prospect", tone: "brand" },
@@ -302,13 +298,6 @@ function AutomateMock() {
       <Window title="Workflow — Qualification automatique">
         <div className="relative grid gap-3 bg-grid p-5 sm:p-6">
           <div className="absolute bottom-10 left-1/2 top-10 w-px -translate-x-1/2 bg-line-strong">
-            {!reduce && (
-              <motion.span
-                className="absolute left-1/2 size-2 -translate-x-1/2 rounded-full bg-brand shadow-glow"
-                animate={{ top: ["0%", "100%"] }}
-                transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-              />
-            )}
           </div>
           {nodes.map((n, i) => (
             <motion.div

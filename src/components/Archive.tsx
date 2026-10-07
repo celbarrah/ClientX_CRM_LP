@@ -12,7 +12,7 @@ import { USE_CASES, CTA, type SectorKey } from "@/lib/content";
 import { Accent, Eyebrow, Reveal, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-const ICONS: Record<SectorKey, LucideIcon> = {
+export const SECTOR_ICONS: Record<SectorKey, LucideIcon> = {
   assurance: Building2,
   auto: Car,
   ecoles: GraduationCap,
@@ -49,9 +49,10 @@ export function Archive() {
   }, [open, lenis]);
 
   return (
-    <section id="cas-usage" className="relative isolate scroll-mt-24 overflow-hidden bg-ink py-24 text-white sm:py-32">
+    <section id="cas-usage" className="scroll-mt-24 px-3 py-6 sm:px-4 sm:py-10">
+      <div className="grain relative isolate mx-auto max-w-[1600px] overflow-hidden rounded-[2.5rem] bg-ink py-20 text-white sm:py-28">
       <div className="absolute inset-0 -z-10 bg-grid-dark [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black,transparent)]" />
-      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[520px] w-[1000px] max-w-[160vw] -translate-x-1/2 rounded-full bg-brand/15 blur-[130px]" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[520px] w-[1000px] max-w-[160vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.20),transparent)]" />
 
       <div className="container-x">
         <Reveal className="flex flex-col items-center text-center">
@@ -77,6 +78,7 @@ export function Archive() {
           ))}
         </div>
       </div>
+      </div>
 
       {mounted &&
         createPortal(
@@ -89,7 +91,7 @@ export function Archive() {
 
 function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
   const s = USE_CASES[index];
-  const Icon = ICONS[s.key];
+  const Icon = SECTOR_ICONS[s.key];
   const reduce = useReducedMotion();
 
   return (
@@ -116,7 +118,7 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
         <Icon className="size-5 text-brand" strokeWidth={1.7} />
         <div className="mt-3 h-1.5 w-2/3 rounded-full bg-white/25" />
         <div className="mt-1.5 h-1.5 w-1/2 rounded-full bg-white/15" />
-        <div className="absolute -bottom-6 -right-6 size-20 rounded-full bg-brand/40 blur-2xl" />
+        <div className="absolute -bottom-6 -right-6 size-20 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.52),transparent)]" />
       </motion.div>
       <motion.div
         variants={{ rest: { y: 0, rotate: 3 }, hover: { y: "-24%", rotate: 6 } }}
@@ -139,13 +141,13 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
         variants={{ rest: { rotateX: -8 }, hover: { rotateX: -26 } }}
         transition={{ duration: 0.55, ease: EASE }}
         style={{ transformOrigin: "50% 100%" }}
-        className="absolute inset-x-0 bottom-0 z-20 flex h-[64%] flex-col justify-end overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-b from-brand/45 via-brand/25 to-brand/15 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_24px_50px_-16px_rgba(50,220,50,0.45)] backdrop-blur-md sm:p-5"
+        className="absolute inset-x-0 bottom-0 z-20 flex h-[64%] flex-col justify-end overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-b from-[#63d863]/85 via-[#3cb43c]/85 to-[#258a25]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_24px_50px_-16px_rgba(50,220,50,0.45)] sm:p-5"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
         <p className="relative font-mono text-[9px] uppercase tracking-[0.14em] text-white/80 sm:text-[10px]">
           {String(index + 1).padStart(2, "0")} — {s.cases.length} cas d&apos;usage
         </p>
-        <p className="relative mt-1 text-balance text-[15px] font-semibold leading-[1.05] tracking-[-0.02em] text-white drop-shadow sm:text-xl">
+        <p className="relative mt-1 text-balance pr-9 text-[15px] font-semibold leading-[1.05] tracking-[-0.02em] text-white drop-shadow sm:pr-11 sm:text-xl">
           {s.sector}
         </p>
         <span className="absolute bottom-3.5 right-3.5 grid size-7 place-items-center rounded-full bg-ink/80 text-brand transition-transform duration-500 group-hover:rotate-45 sm:bottom-5 sm:right-5 sm:size-8">
@@ -158,7 +160,7 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
 
 function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number | null) => void }) {
   const s = USE_CASES[index];
-  const Icon = ICONS[s.key];
+  const Icon = SECTOR_ICONS[s.key];
   const lenis = useLenis();
   const go = useCallback(
     (d: number) => setIndex((index + d + USE_CASES.length) % USE_CASES.length),
@@ -171,7 +173,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-ink/70 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-ink/80 sm:items-center sm:p-6"
       onClick={() => setIndex(null)}
       role="dialog"
       aria-modal="true"
@@ -187,7 +189,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
         className="relative max-h-[92dvh] w-full max-w-5xl overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-slim rounded-t-[2rem] bg-canvas text-ink shadow-float sm:rounded-[2rem]"
       >
         <div className="pointer-events-none absolute inset-0 bg-paper" />
-        <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-brand/35 blur-[90px]" />
+        <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.46),transparent)]" />
 
         {/* Folder tab header */}
         <div className="relative flex items-start justify-between gap-4 p-6 sm:p-10">

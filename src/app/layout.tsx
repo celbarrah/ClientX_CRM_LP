@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { Analytics, GtmNoScript } from "@/components/Analytics";
+import { ChatWidget } from "@/components/ChatWidget";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "swap" });
@@ -35,7 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${geist.variable} ${geistMono.variable} ${instrument.variable}`}>
       <body>
+        <GtmNoScript />
         <SmoothScroll>{children}</SmoothScroll>
+        <Analytics />
+        <ChatWidget />
       </body>
     </html>
   );

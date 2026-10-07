@@ -19,7 +19,7 @@ export function LogoMarquee() {
                 key={copy}
                 aria-hidden={copy === 1}
                 className={cn(
-                  "flex shrink-0 items-center gap-12 pr-12 group-hover:[animation-play-state:paused] sm:gap-16 sm:pr-16",
+                  "flex shrink-0 items-center gap-12 pr-12 will-change-transform group-hover:[animation-play-state:paused] sm:gap-16 sm:pr-16",
                   r === 0 ? "animate-marquee" : "animate-marquee-reverse",
                 )}
               >

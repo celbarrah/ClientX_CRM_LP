@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CTA } from "@/lib/content";
 import { Button } from "@/components/ui";
+import { CHAT_ENABLED } from "@/components/ChatWidget";
+import { cn } from "@/lib/utils";
 
 /** Sticky bottom CTA on mobile, shown once the hero form has scrolled out of view. */
 export function MobileCta() {
@@ -25,7 +27,8 @@ export function MobileCta() {
           animate={{ y: 0 }}
           exit={{ y: 100 }}
           transition={{ type: "spring", damping: 26, stiffness: 260 }}
-          className="fixed inset-x-3 bottom-3 z-50 md:hidden"
+          // Leave room on the right for the chat bubble when it is enabled.
+          className={cn("fixed bottom-3 left-3 z-50 md:hidden", CHAT_ENABLED ? "right-[84px]" : "right-3")}
         >
           <Button href="#demo" size="lg" className="w-full justify-between shadow-float">
             {CTA.primary}

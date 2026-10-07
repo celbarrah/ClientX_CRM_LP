@@ -18,9 +18,9 @@ export function Hero() {
     reduce
       ? {}
       : {
-          initial: { opacity: 0, y: 22, filter: "blur(8px)" },
-          animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-          transition: { duration: 1, ease: EASE, delay },
+          initial: { opacity: 0, y: 18 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.7, ease: EASE, delay },
         };
 
   return (
@@ -28,9 +28,9 @@ export function Hero() {
       <div className="absolute inset-0 -z-10 bg-paper [mask-image:radial-gradient(ellipse_75%_65%_at_50%_10%,black,transparent)]" />
       <motion.div
         style={{ y: glowY }}
-        className="pointer-events-none absolute -right-40 -top-40 -z-10 size-[560px] rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.35),transparent)] blur-2xl"
+        className="pointer-events-none absolute -right-40 -top-40 -z-10 size-[560px] rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.35),transparent)]"
       />
-      <div className="pointer-events-none absolute -left-48 top-[55%] -z-10 size-[420px] rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.22),transparent)] blur-2xl" />
+      <div className="pointer-events-none absolute -left-48 top-[55%] -z-10 size-[420px] rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.22),transparent)]" />
 
       <div className="container-x grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-7">

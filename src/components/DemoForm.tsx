@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,17 +10,13 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, Loader2, Lock } from "lucide
 import { SECTORS, TEAM_SIZES, stepOneSchema, stepTwoSchema } from "@/lib/schema";
 import { CTA } from "@/lib/content";
 import { cn } from "@/lib/utils";
+import { getAttribution } from "@/lib/attribution";
+import { trackFormStep } from "@/components/Analytics";
 
 const formSchema = stepOneSchema.extend(stepTwoSchema.shape).extend({ website: z.string().optional() });
 type FormValues = z.infer<typeof formSchema>;
 
 const STEP_ONE: FieldPath<FormValues>[] = ["firstName", "lastName", "email", "phone"];
-const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
-
-function getUtm() {
-  const params = new URLSearchParams(window.location.search);
-  return Object.fromEntries(UTM_KEYS.flatMap((k) => (params.get(k) ? [[k, params.get(k)!]] : [])));
-}
 
 async function send(body: object) {
   const res = await fetch("/api/lead", {
@@ -31,10 +28,18 @@ async function send(body: object) {
   return res.ok;
 }
 
+
 export function DemoForm() {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
-  const utm = useRef<Record<string, string>>({});
+  // Each step is reported once, even if the visitor goes back and forth.
+  const tracked = useRef(new Set<number>());
+  const stepDone = (n: number, name: string) => {
+    if (tracked.current.has(n)) return;
+    tracked.current.add(n);
+    trackFormStep(n, name);
+  };
 
   const {
     register,
@@ -45,58 +50,33 @@ export function DemoForm() {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(formSchema), mode: "onTouched" });
 
-  useEffect(() => {
-    utm.current = getUtm();
-  }, []);
-
   const teamSize = watch("teamSize");
 
   const next = async () => {
-    if (await trigger(STEP_ONE)) setStep(2);
+    if (!(await trigger(STEP_ONE))) return;
+    stepDone(1, "coordonnees");
+    setStep(2);
   };
 
-  // Data is sent once, only on final submission.
+  // Data is sent once, only on final submission, then the visitor goes to the thank-you page.
   const onSubmit = async (v: FormValues) => {
     setStatus("sending");
-    const ok = await send({ ...v, utm: utm.current, page: window.location.href }).catch(() => false);
-    setStatus(ok ? "success" : "error");
+    const ok = await send({ ...v, utm: getAttribution(), page: window.location.href }).catch(() => false);
+    if (!ok) return setStatus("error");
+    stepDone(2, "entreprise");
+    setStatus("success");
+    try {
+      // Lets /merci fire the conversion only after a real submission.
+      sessionStorage.setItem("cx_lead", JSON.stringify({ firstName: v.firstName, sector: v.sector, teamSize: v.teamSize }));
+    } catch {}
+    router.push("/merci");
   };
-
-  if (status === "success") {
-    return (
-      <div id="demo" className="relative scroll-mt-28">
-        <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-brand/20 blur-3xl" />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-[1.75rem] border border-line-strong bg-surface/80 p-1.5 shadow-float backdrop-blur-xl"
-        >
-          <div className="flex flex-col items-center rounded-[1.4rem] border border-line bg-canvas/70 px-6 py-12 text-center sm:px-8">
-            <motion.span
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 15, delay: 0.15 }}
-              className="grid size-16 place-items-center rounded-full bg-brand text-ink shadow-glow"
-            >
-              <Check className="size-7" strokeWidth={2.8} />
-            </motion.span>
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-brand-deep">Demande envoyée</p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight">Merci, c&apos;est bien reçu !</h3>
-            <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-muted">
-              Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo et votre audit offert.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div id="demo" className="relative scroll-mt-28">
       {/* Glow halo behind the card */}
-      <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-brand/20 blur-3xl" />
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-line-strong bg-surface/80 p-1.5 shadow-float backdrop-blur-xl">
+      <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2.5rem] bg-[radial-gradient(closest-side,rgb(50_220_50/0.26),transparent)]" />
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-line-strong bg-surface p-1.5 shadow-float">
         <div className="rounded-[1.4rem] border border-line bg-canvas/70 p-5 sm:p-7">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
@@ -208,10 +188,10 @@ export function DemoForm() {
                     >
                       <ArrowLeft className="size-4" />
                     </button>
-                    <button type="submit" disabled={status === "sending"} className={cn(submitCls, "flex-1")}>
-                      {status === "sending" ? "Envoi…" : CTA.primary}
+                    <button type="submit" disabled={status === "sending" || status === "success"} className={cn(submitCls, "flex-1")}>
+                      {status === "sending" ? "Envoi…" : status === "success" ? "Redirection…" : CTA.primary}
                       <span className="grid size-9 place-items-center rounded-full bg-brand text-ink">
-                        {status === "sending" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" strokeWidth={2.4} />}
+                        {status === "sending" || status === "success" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" strokeWidth={2.4} />}
                       </span>
                     </button>
                   </div>

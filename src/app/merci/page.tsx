@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 import { THANK_YOU_STEPS, CONTACT } from "@/lib/content";
 import { Accent, Button, Eyebrow, Logo, Reveal } from "@/components/ui";
+import { LeadConfirmed } from "./LeadConfirmed";
 
 export const metadata: Metadata = {
-  title: "Merci — Votre démo ClientX AI est réservée",
+  title: "Merci — Votre demande de démo ClientX AI est envoyée",
   robots: { index: false },
 };
 
@@ -12,7 +13,7 @@ export default function Merci() {
   return (
     <main className="relative isolate min-h-dvh overflow-hidden pb-24">
       <div className="absolute inset-0 -z-10 bg-grid [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
-      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[560px] w-[1000px] max-w-[160vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.3),transparent)] blur-2xl" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[560px] w-[1000px] max-w-[160vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.3),transparent)]" />
 
       <div className="container-x flex justify-center pt-10">
         <a href="/" aria-label="ClientX AI — accueil">
@@ -27,11 +28,11 @@ export default function Merci() {
           </span>
         </Reveal>
         <Reveal delay={0.1} className="mt-8">
-          <Eyebrow>Rendez-vous confirmé</Eyebrow>
+          <Eyebrow>Demande envoyée</Eyebrow>
         </Reveal>
         <Reveal delay={0.15}>
           <h1 className="mt-6 max-w-3xl text-balance text-[2.6rem] font-semibold leading-[1] tracking-[-0.045em] sm:text-6xl">
-            Merci, votre démo est <Accent>réservée</Accent>
+            Merci<LeadConfirmed /> ! Votre demande est <Accent>bien reçue</Accent>
           </h1>
         </Reveal>
         <Reveal delay={0.2}>
