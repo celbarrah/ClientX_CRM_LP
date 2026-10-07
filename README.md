@@ -36,6 +36,8 @@ npm run build && npm start   # production
 
 **Tracking** : `NEXT_PUBLIC_GOOGLE_TAG_ID` accepte un ID GTM (`GTM-…`) ou un Google tag (`G-…` / `AW-…`). `NEXT_PUBLIC_META_PIXEL_ID` charge le Pixel (PageView + Lead). Les variables `NEXT_PUBLIC_*` sont lues au build : relancer `npm run build` après modification.
 
+**Tarifs** : prix en € pour tous ; les visiteurs détectés au Maroc (IP via `/api/geo`, en-tête Vercel `x-vercel-ip-country` ou Cloudflare `cf-ipcountry`) voient les prix MAD par défaut et un sélecteur €/MAD. Prix dans `PRICING` (`content.ts`). Test : ajouter `?pays=MA` ou `?pays=FR` à l'URL.
+
 ## Avant la mise en ligne
 
 - [ ] Bannière de consentement cookies (RGPD/CNIL) avant d'activer GTM et le Pixel Meta.

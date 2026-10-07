@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { detectCountry } from "@/lib/geo";
 
-/* LeadConnector chat bubble, chosen by visitor location: a dedicated widget for Morocco,
+/* LeadConnector chat bubble, chosen by visitor location (IP, see lib/geo): a dedicated widget for Morocco,
    the global one everywhere else. IDs come from the environment. */
 const clean = (v?: string) => v?.trim().replace(/[^A-Za-z0-9]/g, "") || undefined;
 const WIDGET_GLOBAL = clean(process.env.NEXT_PUBLIC_CHAT_WIDGET_ID);
@@ -14,21 +15,15 @@ const SCRIPT_ID = "cx-global-chat-widget";
 
 export const CHAT_ENABLED = Boolean(WIDGET_GLOBAL || WIDGET_MA);
 
-/** Morocco detection from the browser's timezone/locale: instant, no IP lookup. */
-function isMorocco() {
-  try {
-    if (Intl.DateTimeFormat().resolvedOptions().timeZone === "Africa/Casablanca") return true;
-  } catch {}
-  return navigator.languages?.some((l) => /-MA$/i.test(l)) ?? false;
-}
-
 export function ChatWidget() {
   useEffect(() => {
-    const widgetId = (isMorocco() && WIDGET_MA) || WIDGET_GLOBAL || WIDGET_MA;
-    if (!widgetId || document.getElementById(SCRIPT_ID)) return;
+    if (!CHAT_ENABLED || document.getElementById(SCRIPT_ID)) return;
 
-    const load = () => {
-      if (document.getElementById(SCRIPT_ID)) return;
+    const load = async () => {
+      // Same IP-based country as the pricing: Morocco gets its own widget.
+      const country = await detectCountry();
+      const widgetId = (country === "MA" && WIDGET_MA) || WIDGET_GLOBAL || WIDGET_MA;
+      if (!widgetId || document.getElementById(SCRIPT_ID)) return;
       const s = document.createElement("script");
       s.id = SCRIPT_ID;
       s.src = LOADER;

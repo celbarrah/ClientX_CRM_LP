@@ -294,6 +294,10 @@ export const TRUST = [
   { value: "RGPD", label: "Données chiffrées, et qui restent les vôtres" },
 ];
 
+// MAD prices are only shown to visitors detected in Morocco (see Pricing.tsx).
+export const CURRENCIES = { eur: { label: "France (€)", symbol: "€" }, mad: { label: "Maroc (MAD)", symbol: "MAD" } } as const;
+export type Currency = keyof typeof CURRENCIES;
+
 export const PRICING = {
   included: [
     "Sites web & funnels illimités",
@@ -303,21 +307,21 @@ export const PRICING = {
   plans: [
     {
       name: "Starter",
-      price: "990",
+      price: { eur: "990", mad: "14 000" },
       tagline: "Pour lancer votre croissance.",
       features: ["3 utilisateurs", "5 000 contacts CRM"],
       popular: false,
     },
     {
       name: "Pro",
-      price: "2 490",
+      price: { eur: "2 490", mad: "35 100" },
       tagline: "Pour les équipes qui accélèrent.",
       features: ["10 utilisateurs", "15 000 contacts CRM"],
       popular: true,
     },
     {
       name: "Scale",
-      price: "4 990",
+      price: { eur: "4 990", mad: "70 300" },
       tagline: "Pour les organisations sans limites.",
       features: ["Utilisateurs illimités", "Contacts illimités"],
       popular: false,
