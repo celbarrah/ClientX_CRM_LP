@@ -1,0 +1,165 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+@theme {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+
+  --color-brand: #32dc32;
+  --color-brand-deep: #16a34a;
+  --color-brand-soft: #e8f9e8;
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #3d4440;
+  --color-muted: #6b736e;
+  --color-canvas: #f1f4f1;
+  /* Cards sit a hair deeper than the canvas instead of popping out in white */
+  --color-surface: #ebefeb;
+  --color-surface-2: #e4e9e4;
+  --color-line: rgb(10 10 10 / 0.08);
+  --color-line-strong: rgb(10 10 10 / 0.14);
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.55) inset, 0 1px 2px rgb(10 10 10 / 0.03);
+
+  --shadow-float: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 2px 4px rgb(10 10 10 / 0.04),
+    0 32px 80px -24px rgb(10 10 10 / 0.22);
+  --shadow-glow: 0 0 0 1px rgb(50 220 50 / 0.35), 0 10px 30px -8px rgb(50 220 50 / 0.55);
+
+  --animate-marquee: marquee 80s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 80s linear infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+  @keyframes marquee-reverse {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(50 220 50 / 0.55); }
+    50% { box-shadow: 0 0 0 6px rgb(50 220 50 / 0); }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--color-canvas);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-deep);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) { padding-inline: 1.5rem; }
+  @media (width >= 64rem) { padding-inline: 2rem; }
+}
+
+/* Fine grid used behind the hero and dark sections */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(10 10 10 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(10 10 10 / 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+@utility bg-grid-dark {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Subtle film grain for depth on dark surfaces */
+@utility grain {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+@utility mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, black 40%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Paper grain over the whole page — gives the flat canvas a printed, tactile feel */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+@utility bg-paper {
+  background-image:
+    linear-gradient(to right, rgb(10 10 10 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(10 10 10 / 0.035) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@utility shadow-sticker {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 6px 14px -4px rgb(10 10 10 / 0.28);
+}
+
+/* Discreet scrollbars: thin, rounded, no track */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(10 10 10 / 0.22) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(10 10 10 / 0.2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgb(10 10 10 / 0.35); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* Scroll containers inside rounded panels: hide the bar entirely, keep scrolling */
+@utility scrollbar-slim {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
