@@ -98,6 +98,23 @@ export function trackFormStep(step: number, stepName: string, totalSteps = 2) {
   });
 }
 
+/**
+ * Fired right after the form is accepted by the server, before the redirect to the thank-you page.
+ * No personal data: sector, team size and market only.
+ */
+export function trackFormSubmit(data: { sector?: string; teamSize?: string; market?: string }) {
+  const maroc = data.market === "MA";
+  // One event per market: form_submitted_maroc / form_submitted_global (Meta: FormSubmittedMaroc / FormSubmittedGlobal).
+  const name = maroc ? "form_submitted_maroc" : "form_submitted_global";
+  const metaName = maroc ? "FormSubmittedMaroc" : "FormSubmittedGlobal";
+  const params = { form_name: "demo", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: maroc ? "MA" : "global" };
+  pushDataLayer({ event: name, ...params });
+  whenTagsReady((w) => {
+    w.fbq?.("trackCustom", metaName, params);
+    if (!isGTM) w.gtag?.("event", name, params);
+  });
+}
+
 /** Conversion event, fired on the thank-you page after a real submission. */
 export function trackLead(data: { sector?: string; teamSize?: string; market?: string }) {
   pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: data.market });

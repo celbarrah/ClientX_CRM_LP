@@ -11,7 +11,7 @@ import { CTA, THANK_YOU } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getAttribution } from "@/lib/attribution";
 import { detectCountry } from "@/lib/geo";
-import { trackFormStep } from "@/components/Analytics";
+import { trackFormStep, trackFormSubmit } from "@/components/Analytics";
 
 const formSchema = stepOneSchema.extend(stepTwoSchema.shape).extend({ website: z.string().optional() });
 type FormValues = z.infer<typeof formSchema>;
@@ -69,6 +69,7 @@ export function DemoForm() {
     const thankYou = await send({ ...v, utm: getAttribution(), page: window.location.href, country }).catch(() => null);
     if (!thankYou) return setStatus("error");
     stepDone(2, "entreprise");
+    trackFormSubmit({ sector: v.sector, teamSize: v.teamSize, market: thankYou === THANK_YOU.MA.path ? "MA" : "global" });
     setStatus("success");
     try {
       // Lets the thank-you page fire the conversion only after a real submission.
