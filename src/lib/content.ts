@@ -349,11 +349,31 @@ export const FAQ = [
   },
 ];
 
-export const THANK_YOU_STEPS = [
-  { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
-  { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo." },
-  { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
-];
+/** Thank-you pages: /merci (global) and /merci-maroc (visitors in Morocco). Edit each independently. */
+export const THANK_YOU = {
+  global: {
+    path: "/merci",
+    eyebrow: "Demande envoyée",
+    steps: [
+      { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
+      { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo." },
+      { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
+    ],
+    email: CONTACT.email,
+    phone: CONTACT.phone,
+  },
+  MA: {
+    path: "/merci-maroc",
+    eyebrow: "Demande envoyée · Maroc",
+    steps: [
+      { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
+      { title: "Prise de contact", text: "Un eXpert ClientX AI au Maroc vous contacte sous 24h pour planifier votre démo." },
+      { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
+    ],
+    email: CONTACT.email,
+    phone: CONTACT.phone,
+  },
+} as const;
 
 export type SectorKey =
   | "assurance" | "auto" | "ecoles" | "ecommerce" | "energie" | "immobilier" | "restauration" | "bienetre";

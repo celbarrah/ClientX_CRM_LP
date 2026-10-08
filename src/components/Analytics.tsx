@@ -99,8 +99,8 @@ export function trackFormStep(step: number, stepName: string, totalSteps = 2) {
 }
 
 /** Conversion event, fired on the thank-you page after a real submission. */
-export function trackLead(data: { sector?: string; teamSize?: string }) {
-  pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize });
+export function trackLead(data: { sector?: string; teamSize?: string; market?: string }) {
+  pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: data.market });
   whenTagsReady((w) => {
     w.fbq?.("track", "Lead", { content_category: data.sector });
     if (!isGTM) w.gtag?.("event", "generate_lead", { lead_sector: data.sector });

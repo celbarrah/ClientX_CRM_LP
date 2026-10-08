@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const { website, country: hint, ...lead } = parsed.data;
   // Honeypot filled: pretend success so bots learn nothing.
-  if (website) return NextResponse.json({ ok: true });
+  if (website) return NextResponse.json({ ok: true, market: "global" });
 
   // Morocco (by IP) → *_MA credentials, everyone else → global ones.
   const country = resolveCountry(req.headers, hint);
@@ -45,7 +45,8 @@ export async function POST(req: Request) {
   const delivered = results.filter((r) => r.status === "fulfilled").map((r) => (r as PromiseFulfilledResult<string>).value);
   if (!delivered.length) return NextResponse.json({ ok: false, error: "upstream" }, { status: 502 });
 
-  return NextResponse.json({ ok: true, delivered });
+  // `market` tells the form which thank-you page to open (/merci or /merci-maroc).
+  return NextResponse.json({ ok: true, delivered, market });
 }
 
 /* ---------- Webhook ---------- */

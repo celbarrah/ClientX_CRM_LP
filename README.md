@@ -26,7 +26,7 @@ npm run build && npm start   # production
 2. **Étape 2** → envoi unique, en parallèle :
    - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` du marché (JSON uniquement) pour que le workflow appelle le bon compte GHL ;
    - optionnel : `GHL_SEND_DIRECT=true` fait aussi créer le contact dans GHL par le site (tags, note d'attribution, inscription au workflow) — à éviter si le workflow le fait déjà.
-3. Redirection vers `/merci`, qui déclenche la conversion (`generate_lead` dans le dataLayer, `Lead` Meta) — une seule fois par envoi.
+3. Redirection vers `/merci` (global) ou `/merci-maroc` (IP au Maroc) — textes dans `THANK_YOU` (`content.ts`) — qui déclenche la conversion (`generate_lead` dans le dataLayer avec `lead_market` = `MA` / `global`, `Lead` Meta) — une seule fois par envoi.
 
 **Attribution** : `utm_source, utm_medium, utm_campaign, utm_term, utm_content, utm_id, gclid, gbraid, wbraid, fbclid, msclkid, ttclid` + `landing_page`, `referrer`, `fbp`/`fbc`. Conservés pour la session (le visiteur peut naviguer avant de convertir).
 

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Loader2, Lock } from "lucide-react";
 import { SECTORS, TEAM_SIZES, stepOneSchema, stepTwoSchema } from "@/lib/schema";
-import { CTA } from "@/lib/content";
+import { CTA, THANK_YOU } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getAttribution } from "@/lib/attribution";
 import { detectCountry } from "@/lib/geo";
@@ -25,7 +25,10 @@ async function send(body: object) {
     body: JSON.stringify(body),
     keepalive: true,
   });
-  return res.ok;
+  if (!res.ok) return null;
+  // The server says which market (IP) the lead belongs to, so the right thank-you page opens.
+  const data = await res.json().catch(() => ({}));
+  return data.market === "MA" ? THANK_YOU.MA.path : THANK_YOU.global.path;
 }
 
 
@@ -63,15 +66,15 @@ export function DemoForm() {
     setStatus("sending");
     // The server picks the Morocco or global account from the IP; the browser's guess is only a fallback.
     const country = await detectCountry().catch(() => null);
-    const ok = await send({ ...v, utm: getAttribution(), page: window.location.href, country }).catch(() => false);
-    if (!ok) return setStatus("error");
+    const thankYou = await send({ ...v, utm: getAttribution(), page: window.location.href, country }).catch(() => null);
+    if (!thankYou) return setStatus("error");
     stepDone(2, "entreprise");
     setStatus("success");
     try {
-      // Lets /merci fire the conversion only after a real submission.
+      // Lets the thank-you page fire the conversion only after a real submission.
       sessionStorage.setItem("cx_lead", JSON.stringify({ firstName: v.firstName, sector: v.sector, teamSize: v.teamSize }));
     } catch {}
-    router.push("/merci");
+    router.push(thankYou);
   };
 
   return (
