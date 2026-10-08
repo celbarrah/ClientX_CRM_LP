@@ -1,6 +1,5 @@
-"use client";
 
-import { motion } from "motion/react";
+
 import { Check, X } from "lucide-react";
 import { TOOLS, CTA } from "@/lib/content";
 import { Button, Logo, Reveal, SectionHeading } from "@/components/ui";
@@ -24,27 +23,14 @@ export function ToolsVsPlatform() {
             </div>
             <h3 className="mt-3 text-2xl font-semibold tracking-tight">Votre stack actuelle</h3>
             <ul className="mt-6 flex flex-wrap gap-2">
-              {TOOLS.map((t, i) => (
-                <motion.li
+              {TOOLS.map((t) => (
+                <li
                   key={t}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.4, delay: i * 0.03 }}
                   className="relative inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas px-3 py-1.5 text-[13px] text-ink-soft"
                 >
                   <X className="size-3 text-red-500" strokeWidth={2.6} />
-                  <span className="relative">
-                    {t}
-                    <motion.span
-                      initial={{ scaleX: 0 }}
-                      whileInView={{ scaleX: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: 0.8 + i * 0.04 }}
-                      className="absolute left-0 top-1/2 h-px w-full origin-left bg-ink/40"
-                    />
-                  </span>
-                </motion.li>
+                  <span className="line-through decoration-ink/40">{t}</span>
+                </li>
               ))}
             </ul>
           </Reveal>

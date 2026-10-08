@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useLenis } from "lenis/react";
 import {
   ArrowLeft, ArrowRight, ArrowUpRight, Building2, Car, Dumbbell, GraduationCap, Home,
   ShoppingBag, Sun, UtensilsCrossed, X, type LucideIcon,
@@ -23,19 +21,18 @@ export const SECTOR_ICONS: Record<SectorKey, LucideIcon> = {
   bienetre: Dumbbell,
 };
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 const TOTAL = USE_CASES.reduce((n, s) => n + s.cases.length, 0);
 
 export function Archive() {
   const [open, setOpen] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
-  const lenis = useLenis();
-
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (open === null) return;
-    lenis?.stop();
+    // Lock the page behind the modal (native scroll, no smooth-scroll library).
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(null);
       if (e.key === "ArrowRight") setOpen((i) => (i === null ? i : (i + 1) % USE_CASES.length));
@@ -43,10 +40,10 @@ export function Archive() {
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      lenis?.start();
+      document.documentElement.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, lenis]);
+  }, [open]);
 
   return (
     <section id="cas-usage" className="scroll-mt-24 px-3 py-6 sm:px-4 sm:py-10">
@@ -72,9 +69,7 @@ export function Archive() {
 
         <div className="mt-16 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-14 lg:grid-cols-4">
           {USE_CASES.map((s, i) => (
-            <Reveal key={s.key} delay={(i % 4) * 0.07} y={30}>
-              <Folder index={i} onOpen={() => setOpen(i)} />
-            </Reveal>
+            <Folder key={s.key} index={i} onOpen={() => setOpen(i)} />
           ))}
         </div>
       </div>
@@ -82,7 +77,7 @@ export function Archive() {
 
       {mounted &&
         createPortal(
-          <AnimatePresence>{open !== null && <OpenedFolder index={open} setIndex={setOpen} />}</AnimatePresence>,
+          open !== null && <OpenedFolder index={open} setIndex={setOpen} />,
           document.body,
         )}
     </section>
@@ -92,16 +87,10 @@ export function Archive() {
 function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
   const s = USE_CASES[index];
   const Icon = SECTOR_ICONS[s.key];
-  const reduce = useReducedMotion();
-
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onOpen}
-      initial="rest"
-      animate="rest"
-      whileHover={reduce ? undefined : "hover"}
-      whileTap={{ scale: 0.97 }}
       aria-label={`Ouvrir le dossier ${s.sector}`}
       className="group relative block aspect-[5/4] w-full text-left [perspective:1100px]"
     >
@@ -110,26 +99,22 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
       <div className="absolute inset-x-0 bottom-0 top-[10%] rounded-2xl rounded-tl-none border border-brand/40 bg-gradient-to-b from-brand/30 to-brand/10" />
 
       {/* Papers peeking out */}
-      <motion.div
-        variants={{ rest: { y: 0, rotate: -4 }, hover: { y: "-16%", rotate: -8 } }}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="absolute left-[9%] right-[22%] top-[6%] bottom-[30%] overflow-hidden rounded-lg bg-[#121512] p-3 shadow-float ring-1 ring-white/10"
+      <div
+        className="transition-transform duration-300 [transform:rotate(-4deg)] group-hover:[transform:translateY(-16%)_rotate(-8deg)] absolute left-[9%] right-[22%] top-[6%] bottom-[30%] overflow-hidden rounded-lg bg-[#121512] p-3 shadow-float ring-1 ring-white/10"
       >
         <Icon className="size-5 text-brand" strokeWidth={1.7} />
         <div className="mt-3 h-1.5 w-2/3 rounded-full bg-white/25" />
         <div className="mt-1.5 h-1.5 w-1/2 rounded-full bg-white/15" />
         <div className="absolute -bottom-6 -right-6 size-20 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.52),transparent)]" />
-      </motion.div>
-      <motion.div
-        variants={{ rest: { y: 0, rotate: 3 }, hover: { y: "-24%", rotate: 6 } }}
-        transition={{ duration: 0.55, ease: EASE, delay: 0.03 }}
-        className="absolute left-[24%] right-[8%] top-[10%] bottom-[30%] rounded-lg bg-canvas p-3 text-ink shadow-float"
+      </div>
+      <div
+        className="transition-transform duration-300 [transform:rotate(3deg)] group-hover:[transform:translateY(-24%)_rotate(6deg)] absolute left-[24%] right-[8%] top-[10%] bottom-[30%] rounded-lg bg-canvas p-3 text-ink shadow-float"
       >
         <p className="font-mono text-[9px] uppercase tracking-wider text-brand-deep">Cas 01</p>
         <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-tight sm:text-[12px]">{s.cases[0].title}</p>
         <div className="mt-2 h-1 w-3/4 rounded-full bg-ink/10" />
         <div className="mt-1 h-1 w-1/2 rounded-full bg-ink/10" />
-      </motion.div>
+      </div>
 
       {/* Count badge */}
       <span className="absolute right-[5%] top-[13%] z-10 grid size-7 place-items-center rounded-full bg-canvas font-mono text-[10px] font-semibold text-ink shadow-sticker">
@@ -137,11 +122,9 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
       </span>
 
       {/* Glass front flap */}
-      <motion.div
-        variants={{ rest: { rotateX: -8 }, hover: { rotateX: -26 } }}
-        transition={{ duration: 0.55, ease: EASE }}
+      <div
         style={{ transformOrigin: "50% 100%" }}
-        className="absolute inset-x-0 bottom-0 z-20 flex h-[64%] flex-col justify-end overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-b from-[#63d863]/85 via-[#3cb43c]/85 to-[#258a25]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_24px_50px_-16px_rgba(50,220,50,0.45)] sm:p-5"
+        className="transition-transform duration-300 [transform:rotateX(-8deg)] group-hover:[transform:rotateX(-26deg)] absolute inset-x-0 bottom-0 z-20 flex h-[64%] flex-col justify-end overflow-hidden rounded-2xl border border-white/25 bg-gradient-to-b from-[#63d863]/85 via-[#3cb43c]/85 to-[#258a25]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_24px_50px_-16px_rgba(50,220,50,0.45)] sm:p-5"
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
         <p className="relative font-mono text-[9px] uppercase tracking-[0.14em] text-white/80 sm:text-[10px]">
@@ -150,42 +133,32 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
         <p className="relative mt-1 text-balance pr-9 text-[15px] font-semibold leading-[1.05] tracking-[-0.02em] text-white drop-shadow sm:pr-11 sm:text-xl">
           {s.sector}
         </p>
-        <span className="absolute bottom-3.5 right-3.5 grid size-7 place-items-center rounded-full bg-ink/80 text-brand transition-transform duration-500 group-hover:rotate-45 sm:bottom-5 sm:right-5 sm:size-8">
+        <span className="absolute bottom-3.5 right-3.5 grid size-7 place-items-center rounded-full bg-ink/80 text-brand transition-transform duration-300 group-hover:rotate-45 sm:bottom-5 sm:right-5 sm:size-8">
           <ArrowUpRight className="size-3.5 sm:size-4" />
         </span>
-      </motion.div>
-    </motion.button>
+      </div>
+    </button>
   );
 }
 
 function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number | null) => void }) {
   const s = USE_CASES[index];
   const Icon = SECTOR_ICONS[s.key];
-  const lenis = useLenis();
   const go = useCallback(
     (d: number) => setIndex((index + d + USE_CASES.length) % USE_CASES.length),
     [index, setIndex],
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className="fixed inset-0 z-[80] flex items-end justify-center bg-ink/80 sm:items-center sm:p-6"
       onClick={() => setIndex(null)}
       role="dialog"
       aria-modal="true"
       aria-label={`Cas d'usage — ${s.sector}`}
     >
-      <motion.div
-        initial={{ y: 80, scale: 0.92, rotateX: 12, opacity: 0 }}
-        animate={{ y: 0, scale: 1, rotateX: 0, opacity: 1 }}
-        exit={{ y: 60, scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.6, ease: EASE }}
+      <div
         onClick={(e) => e.stopPropagation()}
-        data-lenis-prevent
         className="relative max-h-[92dvh] w-full max-w-5xl overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-slim rounded-t-[2rem] bg-canvas text-ink shadow-float sm:rounded-[2rem]"
       >
         <div className="pointer-events-none absolute inset-0 bg-paper" />
@@ -201,18 +174,10 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-deep">
                 Dossier {String(index + 1).padStart(2, "0")} / {String(USE_CASES.length).padStart(2, "0")}
               </p>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={s.key}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h3 className="mt-1 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">{s.sector}</h3>
-                  <p className="mt-2 font-serif text-xl italic text-ink-soft sm:text-2xl">{s.tagline}</p>
-                </motion.div>
-              </AnimatePresence>
+              <div>
+                <h3 className="mt-1 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">{s.sector}</h3>
+                <p className="mt-2 font-serif text-xl italic text-ink-soft sm:text-2xl">{s.tagline}</p>
+                </div>
             </div>
           </div>
           <button
@@ -225,16 +190,11 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
         </div>
 
         {/* Documents */}
-        <AnimatePresence mode="wait">
-          <motion.div key={s.key} className="relative grid gap-4 px-6 sm:grid-cols-2 sm:px-10">
+        <div key={s.key} className="relative grid gap-4 px-6 sm:grid-cols-2 sm:px-10">
             {s.cases.map((c, i) => (
-              <motion.article
+              <article
                 key={c.title}
-                initial={{ opacity: 0, y: 60, rotate: i % 2 ? 6 : -6, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, rotate: i % 2 ? 0.8 : -0.8, scale: 1 }}
-                exit={{ opacity: 0, y: -20, transition: { duration: 0.15 } }}
-                whileHover={{ rotate: 0, y: -4 }}
-                transition={{ type: "spring", stiffness: 180, damping: 18, delay: 0.1 + i * 0.07 }}
+                style={{ transform: `rotate(${i % 2 ? 0.8 : -0.8}deg)` }}
                 className="relative rounded-2xl border border-line bg-surface p-6 shadow-card"
               >
                 <div className="flex items-center justify-between">
@@ -258,10 +218,9 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
                     </span>
                   ))}
                 </div>
-              </motion.article>
+              </article>
             ))}
-          </motion.div>
-        </AnimatePresence>
+        </div>
 
         {/* Footer: navigation + CTA */}
         <div className="relative flex flex-col-reverse items-stretch gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-10">
@@ -279,7 +238,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
             onClick={(e) => {
               e.preventDefault();
               setIndex(null);
-              setTimeout(() => lenis?.scrollTo("#demo", { offset: -88 }), 350);
+              setTimeout(() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" }), 50);
             }}
             className="group inline-flex h-14 items-center justify-between gap-4 rounded-full bg-ink pl-6 pr-2 font-medium text-white transition-shadow hover:shadow-glow"
           >
@@ -289,7 +248,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
             </span>
           </a>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

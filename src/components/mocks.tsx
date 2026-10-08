@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import {
   BellRing, Bot, Check, CreditCard, FileSignature, GraduationCap, Mail, MessageCircle,
   MessageSquare, MousePointerClick, PlayCircle, Radio, Sparkles, Zap,
@@ -24,13 +23,9 @@ function Window({ title, children, className }: { title: string; children: React
   );
 }
 
-function Float({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function Float({ children, className }: { children: React.ReactNode; className?: string; delay?: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.3 + delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
       className={cn("absolute z-10", className)}
     >
       <div
@@ -38,7 +33,7 @@ function Float({ children, className, delay = 0 }: { children: React.ReactNode; 
       >
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -77,11 +72,8 @@ function CaptureMock() {
                 <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Étape {i + 1}</p>
                 <p className="mt-1 truncate text-[12px] font-medium">{s}</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: ["100%", "62%", "41%"][i] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.4, delay: 0.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  <div
+                    style={{ width: ["100%", "62%", "41%"][i] }}
                     className="h-full rounded-full bg-brand"
                   />
                 </div>
@@ -113,12 +105,8 @@ function NurtureMock() {
         <div className="relative grid gap-3 p-5 sm:p-6">
           <div className="absolute bottom-10 left-[51px] top-10 w-px bg-line-strong sm:left-[55px]" />
           {steps.map((s, i) => (
-            <motion.div
+            <div
               key={s.ch}
-              initial={{ opacity: 0, x: 12 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 + i * 0.12 }}
               className="relative flex items-center gap-3 rounded-xl border border-line bg-canvas p-3"
             >
               <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", i === 2 ? "bg-brand text-ink" : "bg-ink text-white")}>
@@ -129,7 +117,7 @@ function NurtureMock() {
                 <p className="truncate text-[13px] font-medium">{s.t}</p>
               </div>
               <span className="hidden shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-medium text-brand-deep sm:block">{s.rate}</span>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Window>
@@ -156,12 +144,8 @@ function BookingMock() {
                 const on = booked.has(`${c}-${r}`);
                 const hl = c === 1 && r === 2;
                 return (
-                  <motion.div
+                  <div
                     key={`${c}-${r}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.1 + (r * 5 + c) * 0.025 }}
                     className={cn(
                       "flex h-12 flex-col justify-center rounded-lg border px-2",
                       hl ? "border-brand bg-brand text-ink shadow-glow" : on ? "border-ink bg-ink text-white" : "border-dashed border-line-strong",
@@ -173,7 +157,7 @@ function BookingMock() {
                         <span className="mt-1 truncate text-[11px] font-medium leading-none">{hl ? "Réservé par IA" : "Démo"}</span>
                       </>
                     )}
-                  </motion.div>
+                  </div>
                 );
               }),
             )}
@@ -210,7 +194,7 @@ function CoursesMock() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgb(50_220_50/0.35),transparent_60%)]" />
             <PlayCircle className="relative size-10 text-white" strokeWidth={1.4} />
             <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
-              <span className="size-1.5 animate-pulse rounded-full bg-white" /> Live
+              <span className="size-1.5 rounded-full bg-white" /> Live
             </span>
           </div>
           <div className="grid gap-2.5 sm:col-span-3">
@@ -221,11 +205,8 @@ function CoursesMock() {
                   <span className="font-mono text-[10px] text-muted">{m.p}%</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${m.p}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.3, delay: 0.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  <div
+                    style={{ width: `${m.p}%` }}
                     className="h-full rounded-full bg-brand"
                   />
                 </div>
@@ -259,17 +240,13 @@ function CloseMock() {
               </div>
               <div className="grid gap-2">
                 {c.deals.map(([n, v], di) => (
-                  <motion.div
+                  <div
                     key={n}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 + ci * 0.12 + di * 0.08 }}
                     className={cn("rounded-lg border bg-canvas p-2.5", ci === 2 ? "border-brand shadow-[0_0_0_3px_rgb(50_220_50/0.15)]" : "border-line")}
                   >
                     <p className="truncate text-[11px] font-medium sm:text-[12px]">{n}</p>
                     <p className={cn("mt-1 text-[11px] font-semibold tabular-nums", ci === 2 ? "text-brand-deep" : "text-ink-soft")}>{v}</p>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -300,12 +277,8 @@ function AutomateMock() {
           <div className="absolute bottom-10 left-1/2 top-10 w-px -translate-x-1/2 bg-line-strong">
           </div>
           {nodes.map((n, i) => (
-            <motion.div
+            <div
               key={n.t}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 + i * 0.12 }}
               className={cn(
                 "relative mx-auto flex w-full max-w-xs items-center gap-3 rounded-xl border p-3",
                 n.tone === "ink" ? "border-ink bg-ink text-white" : n.tone === "brand" ? "border-brand bg-brand text-ink" : "border-line bg-canvas",
@@ -318,7 +291,7 @@ function AutomateMock() {
                 <p className="font-mono text-[10px] uppercase tracking-wider opacity-60">{n.t}</p>
                 <p className="text-[13px] font-medium">{n.d}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Window>

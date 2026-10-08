@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Check, Sparkles } from "lucide-react";
 import { PRICING, CTA, CURRENCIES, type Currency } from "@/lib/content";
 import { detectCountry } from "@/lib/geo";
@@ -34,7 +33,7 @@ export function Pricing() {
         />
 
         {inMorocco && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-10 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <div role="radiogroup" aria-label="Devise" className="inline-flex rounded-full border border-line-strong bg-surface p-1">
               {(Object.keys(CURRENCIES) as Currency[]).map((c) => (
                 <button
@@ -43,16 +42,16 @@ export function Pricing() {
                   role="radio"
                   aria-checked={currency === c}
                   onClick={() => setCurrency(c)}
-                  className="relative rounded-full px-5 py-2 text-[13px] font-medium transition-colors"
-                >
-                  {currency === c && (
-                    <motion.span layoutId="currency-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
+                  className={cn(
+                    "rounded-full px-5 py-2 text-[13px] font-medium",
+                    currency === c ? "bg-ink text-white" : "text-ink-soft",
                   )}
-                  <span className={cn("relative", currency === c ? "text-white" : "text-ink-soft")}>{CURRENCIES[c].label}</span>
+                >
+                  {CURRENCIES[c].label}
                 </button>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         <div className={cn("grid items-stretch gap-4 lg:grid-cols-3", inMorocco ? "mt-12" : "mt-16")}>
@@ -78,20 +77,11 @@ export function Pricing() {
                   )}
                 </div>
                 <p className={cn("mt-3 text-[15px]", p.popular ? "text-white/60" : "text-muted")}>{p.tagline}</p>
-                <p className="mt-8 flex items-baseline gap-1.5 overflow-hidden">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={currency}
-                      initial={{ y: 18, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -18, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex items-baseline gap-1.5 whitespace-nowrap"
-                    >
-                      <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[currency]}</span>
-                      <span className="text-2xl font-semibold">{symbol}</span>
-                    </motion.span>
-                  </AnimatePresence>
+                <p className="mt-8 flex items-baseline gap-1.5">
+                  <span className="flex items-baseline gap-1.5 whitespace-nowrap">
+                    <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[currency]}</span>
+                    <span className="text-2xl font-semibold">{symbol}</span>
+                  </span>
                   <span className={cn("ml-1 text-sm", p.popular ? "text-white/50" : "text-muted")}>/ an</span>
                 </p>
                 <div className={cn("my-8 h-px", p.popular ? "bg-white/10" : "bg-line")} />

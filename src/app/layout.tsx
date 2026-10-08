@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
-import { SmoothScroll } from "@/components/SmoothScroll";
 import { Analytics, GtmNoScript } from "@/components/Analytics";
 import { ChatWidget } from "@/components/ChatWidget";
 import "./globals.css";
@@ -38,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr" className={`${geist.variable} ${geistMono.variable} ${instrument.variable}`}>
       <body>
         <GtmNoScript />
-        <SmoothScroll>{children}</SmoothScroll>
+        {children}
         <Analytics />
         <ChatWidget />
       </body>

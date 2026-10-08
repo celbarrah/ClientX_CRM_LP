@@ -1,31 +1,15 @@
-"use client";
-
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-
+/* Plain wrapper. It used to fade content in on scroll; now static so every section paints
+   immediately (no entrance animation, no scroll observers). `delay` and `y` are accepted and ignored. */
 export function Reveal({
   children,
-  delay = 0,
-  y = 16,
-  className,
+  delay: _delay,
+  y: _y,
   ...rest
-}: HTMLMotionProps<"div"> & { delay?: number; y?: number }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, ease: EASE, delay }}
-      className={className}
-      {...rest}
-    >
-      {children}
-    </motion.div>
-  );
+}: React.HTMLAttributes<HTMLDivElement> & { delay?: number; y?: number }) {
+  return <div {...rest}>{children}</div>;
 }
 
 export function Eyebrow({ children, dark, className }: { children: React.ReactNode; dark?: boolean; className?: string }) {
@@ -70,7 +54,7 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <Reveal className={cn("flex flex-col gap-5", align === "center" ? "items-center text-center" : "items-start", className)}>
+    <div className={cn("flex flex-col gap-5", align === "center" ? "items-center text-center" : "items-start", className)}>
       {eyebrow && <Eyebrow dark={dark}>{eyebrow}</Eyebrow>}
       <h2
         className={cn(
@@ -85,7 +69,7 @@ export function SectionHeading({
           {subtitle}
         </p>
       )}
-    </Reveal>
+    </div>
   );
 }
 
@@ -116,7 +100,7 @@ export function Button({ href, children, variant = "dark", size = "md", classNam
     <a
       href={href}
       className={cn(
-        "group relative inline-flex items-center justify-center gap-3 rounded-full font-medium tracking-tight transition-all duration-300 ease-out active:scale-[0.98]",
+        "group relative inline-flex items-center justify-center gap-3 rounded-full font-medium tracking-tight transition-[background-color,box-shadow] duration-200",
         size === "lg" ? "h-14 pl-7 pr-2 text-[15px]" : "h-11 pl-5 pr-1.5 text-sm",
         !icon && (size === "lg" ? "pr-7" : "pr-5"),
         styles,
@@ -125,13 +109,7 @@ export function Button({ href, children, variant = "dark", size = "md", classNam
     >
       <span>{children}</span>
       {icon && (
-        <span
-          className={cn(
-            "grid place-items-center rounded-full transition-transform duration-300 group-hover:rotate-45",
-            size === "lg" ? "size-10" : "size-8",
-            iconStyles,
-          )}
-        >
+        <span className={cn("grid place-items-center rounded-full", size === "lg" ? "size-10" : "size-8", iconStyles)}>
           <ArrowUpRight className={size === "lg" ? "size-4.5" : "size-4"} strokeWidth={2.2} />
         </span>
       )}
@@ -152,11 +130,10 @@ export function Logo({ dark, className }: { dark?: boolean; className?: string }
   );
 }
 
-/** Tilted green tag that pops in like a sticker slapped on the page. */
+/** Tilted green tag, like a sticker slapped on the page. Static: no pop-in. */
 export function Sticker({
   children,
   rotate = -6,
-  delay = 0,
   dark,
   className,
 }: {
@@ -166,14 +143,9 @@ export function Sticker({
   dark?: boolean;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
   return (
-    <motion.span
-      initial={reduce ? false : { opacity: 0, scale: 0.4, rotate: rotate - 18 }}
-      whileInView={{ opacity: 1, scale: 1, rotate }}
-      whileHover={{ rotate: rotate + 4, scale: 1.06 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ type: "spring", stiffness: 260, damping: 14, delay }}
+    <span
+      style={{ transform: `rotate(${rotate}deg)` }}
       className={cn(
         "inline-flex select-none items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium tracking-tight shadow-sticker sm:text-sm",
         dark ? "bg-ink text-brand" : "bg-brand text-ink",
@@ -181,45 +153,23 @@ export function Sticker({
       )}
     >
       {children}
-    </motion.span>
+    </span>
   );
 }
 
-/** Marker highlight with text-selection handles, sweeping in on view. */
+/** Marker highlight with text-selection handles. Static. */
 export function Highlight({ children, className }: { children: React.ReactNode; className?: string }) {
-  const reduce = useReducedMotion();
   return (
     <span className={cn("relative inline-block px-[0.12em]", className)}>
-      <motion.span
-        aria-hidden
-        initial={reduce ? false : { scaleX: 0 }}
-        whileInView={{ scaleX: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.9, ease: EASE, delay: 0.25 }}
-        className="absolute inset-y-[0.06em] inset-x-0 origin-left bg-brand/30 ring-1 ring-brand/60"
-      />
-      <motion.span
-        aria-hidden
-        initial={reduce ? false : { opacity: 0, y: -6 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="absolute -left-[0.18em] -top-[0.32em] flex flex-col items-center"
-      >
+      <span aria-hidden className="absolute inset-y-[0.06em] inset-x-0 bg-brand/30 ring-1 ring-brand/60" />
+      <span aria-hidden className="absolute -left-[0.18em] -top-[0.32em] flex flex-col items-center">
         <svg viewBox="0 0 12 10" className="h-[0.22em] w-[0.26em] text-brand" fill="currentColor"><path d="M0 0h12L6 10z" /></svg>
         <span className="h-[0.9em] w-[2px] bg-brand" />
-      </motion.span>
-      <motion.span
-        aria-hidden
-        initial={reduce ? false : { opacity: 0, y: 6 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: 1 }}
-        className="absolute -bottom-[0.32em] -right-[0.18em] flex flex-col items-center"
-      >
+      </span>
+      <span aria-hidden className="absolute -bottom-[0.32em] -right-[0.18em] flex flex-col items-center">
         <span className="h-[0.9em] w-[2px] bg-brand" />
         <svg viewBox="0 0 12 10" className="h-[0.22em] w-[0.26em] text-brand" fill="currentColor"><path d="M6 0l6 10H0z" /></svg>
-      </motion.span>
+      </span>
       <span className="relative">{children}</span>
     </span>
   );

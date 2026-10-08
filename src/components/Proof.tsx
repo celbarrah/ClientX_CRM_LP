@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { TESTIMONIALS, TRUST, SUPPORT, USE_CASES } from "@/lib/content";
 import { SECTOR_ICONS } from "@/components/Archive";
@@ -11,17 +10,15 @@ import { cn } from "@/lib/utils";
 /** Testimonials + trust + support in one section. */
 export function Proof() {
   const [i, setI] = useState(0);
-  const reduce = useReducedMotion();
   const t = TESTIMONIALS[i];
   const Icon = SECTOR_ICONS[t.sector];
   const sector = USE_CASES.find((u) => u.key === t.sector)?.sector;
   const go = (d: number) => setI((v) => (v + d + TESTIMONIALS.length) % TESTIMONIALS.length);
 
   useEffect(() => {
-    if (reduce) return;
     const id = setTimeout(() => go(1), 8000);
     return () => clearTimeout(id);
-  }, [i, reduce]);
+  }, [i]);
 
   return (
     <section className="relative isolate overflow-hidden py-24 sm:py-32">
@@ -36,14 +33,7 @@ export function Proof() {
             “
           </span>
           <div className="relative min-h-[15rem] sm:min-h-[13rem]">
-            <AnimatePresence mode="wait">
-              <motion.figure
-                key={i}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-              >
+            <figure key={i}>
                 <blockquote className="text-balance font-serif text-[1.9rem] leading-[1.15] sm:text-5xl">{t.quote}</blockquote>
                 <figcaption className="mt-8 flex items-center justify-center gap-3">
                   <span className="grid size-11 place-items-center rounded-full bg-ink text-brand">
@@ -54,8 +44,7 @@ export function Proof() {
                     <span className="block text-sm text-muted">{sector}</span>
                   </span>
                 </figcaption>
-              </motion.figure>
-            </AnimatePresence>
+            </figure>
           </div>
 
           <div className="mt-10 flex items-center justify-center gap-4">
@@ -68,7 +57,7 @@ export function Proof() {
                   key={k}
                   onClick={() => setI(k)}
                   aria-label={`Témoignage ${k + 1}`}
-                  className={cn("h-1.5 rounded-full transition-all duration-500", k === i ? "w-8 bg-brand" : "w-3 bg-ink/15")}
+                  className={cn("h-1.5 rounded-full", k === i ? "w-8 bg-brand" : "w-3 bg-ink/15")}
                 />
               ))}
             </div>
@@ -104,7 +93,7 @@ export function Proof() {
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {SUPPORT.items.map((s, k) => (
-              <Sticker key={s.title} rotate={[-4, 3, -2][k]} delay={0.1 * k} dark={k === 1}>
+              <Sticker key={s.title} rotate={[-4, 3, -2][k]} dark={k === 1}>
                 {s.title}
               </Sticker>
             ))}

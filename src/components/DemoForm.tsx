@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Loader2, Lock } from "lucide-react";
 import { SECTORS, TEAM_SIZES, stepOneSchema, stepTwoSchema } from "@/lib/schema";
 import { CTA } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getAttribution } from "@/lib/attribution";
+import { detectCountry } from "@/lib/geo";
 import { trackFormStep } from "@/components/Analytics";
 
 const formSchema = stepOneSchema.extend(stepTwoSchema.shape).extend({ website: z.string().optional() });
@@ -61,7 +61,9 @@ export function DemoForm() {
   // Data is sent once, only on final submission, then the visitor goes to the thank-you page.
   const onSubmit = async (v: FormValues) => {
     setStatus("sending");
-    const ok = await send({ ...v, utm: getAttribution(), page: window.location.href }).catch(() => false);
+    // The server picks the Morocco or global account from the IP; the browser's guess is only a fallback.
+    const country = await detectCountry().catch(() => null);
+    const ok = await send({ ...v, utm: getAttribution(), page: window.location.href, country }).catch(() => false);
     if (!ok) return setStatus("error");
     stepDone(2, "entreprise");
     setStatus("success");
@@ -92,7 +94,7 @@ export function DemoForm() {
                 <span
                   key={s}
                   className={cn(
-                    "h-1.5 rounded-full transition-all duration-500",
+                    "h-1.5 rounded-full",
                     s <= step ? "w-8 bg-brand" : "w-4 bg-ink/10",
                   )}
                 />
@@ -104,16 +106,8 @@ export function DemoForm() {
             {/* Honeypot */}
             <input type="text" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden {...register("website")} />
 
-            <AnimatePresence mode="wait" initial={false}>
-              {step === 1 ? (
-                <motion.div
-                  key="s1"
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="grid gap-3.5"
-                >
+            {step === 1 ? (
+                <div key="s1" className="grid gap-3.5">
                   <div className="grid gap-3.5 sm:grid-cols-2">
                     <Field label="Prénom" error={errors.firstName?.message}>
                       <input {...register("firstName")} autoComplete="given-name" placeholder="Sarah" className={inputCls(!!errors.firstName)} />
@@ -130,20 +124,13 @@ export function DemoForm() {
                   </Field>
                   <button type="button" onClick={next} className={submitCls}>
                     Continuer
-                    <span className="grid size-9 place-items-center rounded-full bg-brand text-ink transition-transform duration-300 group-hover:translate-x-0.5">
+                    <span className="grid size-9 place-items-center rounded-full bg-brand text-ink">
                       <ArrowRight className="size-4" strokeWidth={2.2} />
                     </span>
                   </button>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
-                  key="s2"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 16 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="grid gap-3.5"
-                >
+                <div key="s2" className="grid gap-3.5">
                   <Field label="Entreprise" error={errors.company?.message}>
                     <input {...register("company")} autoComplete="organization" placeholder="Nom de votre entreprise" className={inputCls(!!errors.company)} />
                   </Field>
@@ -168,7 +155,7 @@ export function DemoForm() {
                           aria-checked={teamSize === t}
                           onClick={() => setValue("teamSize", t, { shouldValidate: true })}
                           className={cn(
-                            "h-11 rounded-xl border text-[13px] font-medium tabular-nums transition-all",
+                            "h-11 rounded-xl border text-[13px] font-medium tabular-nums",
                             teamSize === t
                               ? "border-ink bg-ink text-white shadow-[0_0_0_3px_rgb(50_220_50/0.35)]"
                               : "border-line-strong bg-canvas text-ink-soft hover:border-ink/40",
@@ -200,9 +187,8 @@ export function DemoForm() {
                       L&apos;envoi a échoué. Réessayez, ou écrivez-nous à contact@clientx.ai.
                     </p>
                   )}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </form>
 
           <p className="mt-5 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
@@ -223,13 +209,13 @@ export function DemoForm() {
 
 const inputCls = (invalid: boolean) =>
   cn(
-    "h-12 w-full rounded-xl border bg-canvas px-4 text-[15px] text-ink outline-none transition-all placeholder:text-ink/30",
+    "h-12 w-full rounded-xl border bg-canvas px-4 text-[15px] text-ink outline-none placeholder:text-ink/30",
     "focus:border-ink focus:shadow-[0_0_0_4px_rgb(50_220_50/0.22)]",
     invalid ? "border-red-400" : "border-line-strong hover:border-ink/30",
   );
 
 const submitCls =
-  "group mt-1 inline-flex h-14 w-full items-center justify-between rounded-full bg-ink pl-6 pr-2.5 text-[15px] font-medium text-white transition-all duration-300 hover:shadow-glow disabled:opacity-80";
+  "group mt-1 inline-flex h-14 w-full items-center justify-between rounded-full bg-ink pl-6 pr-2.5 text-[15px] font-medium text-white hover:shadow-glow disabled:opacity-80";
 
 function Field({ label, error, group, children }: { label: string; error?: string; group?: boolean; children: React.ReactNode }) {
   const Tag = group ? "div" : "label";
@@ -237,18 +223,7 @@ function Field({ label, error, group, children }: { label: string; error?: strin
     <Tag className="grid gap-1.5">
       <span className="text-[13px] font-medium text-ink-soft">{label}</span>
       {children}
-      <AnimatePresence>
-        {error && (
-          <motion.span
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-[12px] text-red-500"
-          >
-            {error}
-          </motion.span>
-        )}
-      </AnimatePresence>
+      {error && <span className="text-[12px] text-red-500">{error}</span>}
     </Tag>
   );
 }

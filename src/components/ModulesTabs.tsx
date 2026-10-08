@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { MODULES, CTA } from "@/lib/content";
 import { Accent, Button, Eyebrow, Reveal, Sticker } from "@/components/ui";
@@ -10,16 +8,23 @@ import { ModuleMock } from "@/components/mocks";
 import { cn } from "@/lib/utils";
 
 const DURATION = 7000;
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** All six modules in one interactive section (replaces the engine + six alternating blocks). */
 export function ModulesTabs() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-20%" });
-  const reduce = useReducedMotion();
-  const running = inView && !paused && !reduce;
+  const [inView, setInView] = useState(false);
+  const running = inView && !paused;
+
+  // Auto-advance only while the section is on screen.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "-20% 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!running) return;
@@ -49,7 +54,6 @@ export function ModulesTabs() {
           <div className="lg:col-span-5">
             <div
               role="tablist"
-              data-lenis-prevent
               className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-slim lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:px-0 lg:pb-0"
             >
               {MODULES.map((mod, i) => {
@@ -70,11 +74,9 @@ export function ModulesTabs() {
                     {/* progress bar on the divider (desktop) */}
                     <span className="absolute inset-x-0 -top-px hidden h-[2px] overflow-hidden lg:block">
                       {on && (
-                        <motion.span
+                        <span
                           key={`${active}-${running}`}
-                          initial={{ scaleX: running ? 0 : 1 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ duration: running ? DURATION / 1000 : 0, ease: "linear" }}
+                          style={running ? { animation: `tab-progress ${DURATION}ms linear forwards` } : undefined}
                           className="block h-full origin-left bg-brand"
                         />
                       )}
@@ -92,19 +94,11 @@ export function ModulesTabs() {
                         {label}
                       </span>
                     </span>
-                    <AnimatePresence initial={false}>
-                      {on && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.45, ease: EASE }}
-                          className="hidden overflow-hidden lg:block"
-                        >
-                          <p className="pl-9 pt-3 text-[15px] leading-relaxed text-muted">{mod.subtitle}</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {on && (
+                      <div className="hidden lg:block">
+                        <p className="pl-9 pt-3 text-[15px] leading-relaxed text-muted">{mod.subtitle}</p>
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -117,54 +111,25 @@ export function ModulesTabs() {
               <div className="pointer-events-none absolute inset-0 bg-paper opacity-80" />
               <div className="pointer-events-none absolute -bottom-16 left-1/2 h-48 w-2/3 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.39),transparent)]" />
               <div className="absolute right-5 top-5 z-20">
-                <AnimatePresence mode="wait">
-                  <motion.div key={m.key} exit={{ opacity: 0, scale: 0.8 }}>
-                    <Sticker rotate={5}>
-                      {m.title} {m.accent}
-                    </Sticker>
-                  </motion.div>
-                </AnimatePresence>
+                <Sticker rotate={5}>
+                  {m.title} {m.accent}
+                </Sticker>
               </div>
               <div className="relative min-h-[340px] pt-10 sm:min-h-[400px]">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={m.key}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                  >
-                    <ModuleMock name={m.key} />
-                  </motion.div>
-                </AnimatePresence>
+                <ModuleMock name={m.key} />
               </div>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.ul
-                key={m.key}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-6 grid gap-4 sm:grid-cols-3"
-              >
-                {m.bullets.map((b, i) => (
-                  <motion.li
-                    key={b.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.06 }}
-                    className="border-t border-line-strong pt-4"
-                  >
-                    <span className="flex items-center gap-2 font-semibold tracking-tight">
-                      <Check className="size-4 text-brand-deep" strokeWidth={3} /> {b.title}
-                    </span>
-                    <span className="mt-1.5 block text-[14px] leading-relaxed text-muted">{b.text}</span>
-                  </motion.li>
-                ))}
-              </motion.ul>
-            </AnimatePresence>
+            <ul className="mt-6 grid gap-4 sm:grid-cols-3">
+              {m.bullets.map((b) => (
+                <li key={b.title} className="border-t border-line-strong pt-4">
+                  <span className="flex items-center gap-2 font-semibold tracking-tight">
+                    <Check className="size-4 text-brand-deep" strokeWidth={3} /> {b.title}
+                  </span>
+                  <span className="mt-1.5 block text-[14px] leading-relaxed text-muted">{b.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

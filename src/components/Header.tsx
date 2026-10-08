@@ -1,27 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "motion/react";
+import { useEffect, useState } from "react";
 import { NAV, CTA } from "@/lib/content";
 import { Button, Logo } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 export function Header() {
-  const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
-  useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 24));
+  useEffect(() => {
+    // Passive listener; React skips the render when the boolean doesn't change.
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4"
-    >
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4">
       <div
         className={cn(
-          "mx-auto flex h-16 max-w-[1440px] items-center justify-between rounded-full pl-5 pr-2 transition-all duration-500",
-          scrolled ? "border border-line bg-canvas/95 shadow-card" : "border border-transparent",
+          "mx-auto flex h-16 max-w-[1440px] items-center justify-between rounded-full border pl-5 pr-2",
+          scrolled ? "border-line bg-canvas/95 shadow-card" : "border-transparent",
         )}
       >
         <a href="#top" aria-label="ClientX AI — accueil">
@@ -42,6 +41,6 @@ export function Header() {
           {CTA.primary}
         </Button>
       </div>
-    </motion.header>
+    </header>
   );
 }

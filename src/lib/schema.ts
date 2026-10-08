@@ -35,6 +35,8 @@ const meta = {
   website: z.string().max(0).optional(),
   utm: z.record(z.string().max(40), z.string().max(600)).optional(),
   page: z.string().optional(),
+  // Browser-side country (honours ?pays= for QA). Only used when the host sends no IP header.
+  country: z.string().max(2).nullish(),
 };
 
 /** Full lead, sent once on final submission. */

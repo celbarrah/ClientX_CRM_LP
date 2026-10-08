@@ -1,6 +1,6 @@
 # ClientX AI — Landing page démo
 
-Next.js 16 · Tailwind CSS 4 · Lenis · Motion · React Hook Form + Zod.
+Next.js 16 · Tailwind CSS 4 · React Hook Form + Zod. Une seule LP pour le Maroc et le reste du monde.
 
 ```bash
 npm install
@@ -24,7 +24,7 @@ npm run build && npm start   # production
 
 1. **Étape 1** (coordonnées) → validation uniquement, rien n'est envoyé.
 2. **Étape 2** → envoi unique, en parallèle :
-   - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` (JSON uniquement) pour que le workflow appelle GHL ;
+   - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` du marché (JSON uniquement) pour que le workflow appelle le bon compte GHL ;
    - optionnel : `GHL_SEND_DIRECT=true` fait aussi créer le contact dans GHL par le site (tags, note d'attribution, inscription au workflow) — à éviter si le workflow le fait déjà.
 3. Redirection vers `/merci`, qui déclenche la conversion (`generate_lead` dans le dataLayer, `Lead` Meta) — une seule fois par envoi.
 
@@ -32,11 +32,15 @@ npm run build && npm start   # production
 
 **Événements formulaire** : `form_step_complete` (dataLayer / Google) et `FormStepComplete` (Meta, événement personnalisé) à chaque étape validée — paramètres `form_name`, `form_step` (1 ou 2), `form_step_name` (`coordonnees`, `entreprise`), `form_total_steps`. Une seule fois par étape, aucune donnée personnelle. Puis `generate_lead` / `Lead` sur `/merci`.
 
-**Chat** : bulle LeadConnector via `NEXT_PUBLIC_CHAT_WIDGET_ID` (global) et `NEXT_PUBLIC_CHAT_WIDGET_ID_MA` (visiteurs dont le fuseau horaire est `Africa/Casablanca`). Chargée à la première interaction ou après 3,5 s pour ne pas ralentir l'affichage. Laisser vide pour désactiver.
+**Chat** : bulle LeadConnector via `NEXT_PUBLIC_CHAT_WIDGET_ID` (global) et `NEXT_PUBLIC_CHAT_WIDGET_ID_MA` (visiteurs au Maroc, détectés par IP). Chargée à la première interaction ou après 3,5 s pour ne pas ralentir l'affichage. Laisser vide pour désactiver.
 
 **Tracking** : `NEXT_PUBLIC_GOOGLE_TAG_ID` accepte un ID GTM (`GTM-…`) ou un Google tag (`G-…` / `AW-…`). `NEXT_PUBLIC_META_PIXEL_ID` charge le Pixel (PageView + Lead). Les variables `NEXT_PUBLIC_*` sont lues au build : relancer `npm run build` après modification.
 
-**Tarifs** : prix en € pour tous ; les visiteurs détectés au Maroc (IP via `/api/geo`, en-tête Vercel `x-vercel-ip-country` ou Cloudflare `cf-ipcountry`) voient les prix MAD par défaut et un sélecteur €/MAD. Prix dans `PRICING` (`content.ts`). Test : ajouter `?pays=MA` ou `?pays=FR` à l'URL.
+**Tarifs** : prix en € pour tous ; les visiteurs détectés au Maroc (IP via `/api/geo` : en-tête Netlify `x-nf-geo`, Vercel `x-vercel-ip-country` ou Cloudflare `cf-ipcountry`) voient les prix MAD par défaut et un sélecteur €/MAD. Prix dans `PRICING` (`content.ts`). Test : ajouter `?pays=MA` ou `?pays=FR` à l'URL.
+
+**Marché Maroc / global** (`src/lib/market.ts`) : le serveur lit le pays de l'IP à chaque envoi. Maroc → `GHL_PRIVATE_INTEGRATION_KEY_MA`, `GHL_SUBACCOUNT_ID_MA`, `GHL_WORKFLOW_ID_MA` (+ widget `NEXT_PUBLIC_CHAT_WIDGET_ID_MA`) ; ailleurs → les variables sans suffixe. Si la clé `_MA` est vide, le compte global est utilisé en entier (jamais un mélange des deux). Le pays envoyé par le navigateur (et `?pays=MA`) ne sert qu'en local, quand l'hébergeur ne fournit pas d'en-tête IP.
+
+**Performance** : aucune animation d'entrée ni défilement JS (pas de Lenis / Motion) — défilement natif, sections affichées immédiatement. Seuls restent les survols, la bande de logos et la barre de progression des modules (CSS).
 
 ## Avant la mise en ligne
 

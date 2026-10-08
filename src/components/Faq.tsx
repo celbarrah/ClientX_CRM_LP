@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Plus } from "lucide-react";
 import { FAQ, CONTACT } from "@/lib/content";
 import { Reveal, SectionHeading, Sticker } from "@/components/ui";
@@ -32,31 +31,19 @@ export function Faq() {
                   className="group flex w-full items-center justify-between gap-6 py-6 text-left"
                 >
                   <span className="flex items-baseline gap-4">
-                    <span className={cn("font-mono text-[11px] transition-colors", isOpen ? "text-brand-deep" : "text-muted")}>0{i + 1}</span>
+                    <span className={cn("font-mono text-[11px]", isOpen ? "text-brand-deep" : "text-muted")}>0{i + 1}</span>
                     <span className="text-lg font-semibold tracking-tight sm:text-xl">{f.q}</span>
                   </span>
                   <span
                     className={cn(
-                      "grid size-9 shrink-0 place-items-center rounded-full border transition-all duration-300",
+                      "grid size-9 shrink-0 place-items-center rounded-full border",
                       isOpen ? "rotate-45 border-brand bg-brand text-ink" : "border-line-strong group-hover:bg-ink group-hover:text-white",
                     )}
                   >
                     <Plus className="size-4" />
                   </span>
                 </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <p className="max-w-2xl pb-7 pl-8 text-[15px] leading-relaxed text-muted">{f.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {isOpen && <p className="max-w-2xl pb-7 pl-8 text-[15px] leading-relaxed text-muted">{f.a}</p>}
               </Reveal>
             );
           })}
