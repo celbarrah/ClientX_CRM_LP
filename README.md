@@ -50,3 +50,13 @@ npm run build && npm start   # production
 - [ ] Remplacer les maquettes par les **captures produit**. (Logos clients : `public/clients/`, liste dans `CLIENTS` de `content.ts`.)
 - [ ] Logos SVG ClientX (actuellement PNG dérivés du fichier fourni : `public/logo-dark.png`, `public/logo-white.png`).
 - [ ] Compléter les `[À compléter]` des pages **Mentions légales** et **Politique de confidentialité**, et les faire relire.
+
+## Déploiement Cloudflare (Workers + OpenNext)
+
+`wrangler.jsonc` + `open-next.config.ts` (adaptateur `@opennextjs/cloudflare`, nécessaire pour `/api/lead` et `/api/geo`).
+
+- **Build command** : `npx opennextjs-cloudflare build` · **Deploy** : `npx wrangler deploy` · **Preview** : `npx wrangler versions upload`
+- **Variables d'exécution** (Worker > Settings > Variables and Secrets, type *Secret* pour les clés) : `LEAD_WEBHOOK_URL`, `GHL_*`, `GHL_*_MA`, `GHL_SEND_DIRECT`.
+- **Variables de build** (Settings > Build > Variables) : toutes les `NEXT_PUBLIC_*` (lues au build).
+- Le pays vient de l'en-tête `cf-ipcountry` ajouté par Cloudflare.
+- Le build OpenNext n'est pas supporté sous Windows (erreur `Unexpected loadManifest`) : tester localement via WSL, ou laisser Cloudflare builder (Linux).
