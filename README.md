@@ -1,6 +1,6 @@
 # ClientX AI — Landing page démo
 
-Next.js 16 · Tailwind CSS 4 · React Hook Form + Zod. Une seule LP pour le Maroc et le reste du monde.
+Next.js 16 · Tailwind CSS 4 · React Hook Form + Zod · Cloudflare Pages. Une seule LP pour le Maroc et le reste du monde.
 
 ```bash
 npm install
@@ -51,13 +51,12 @@ npm run build && npm start   # production
 - [ ] Logos SVG ClientX (actuellement PNG dérivés du fichier fourni : `public/logo-dark.png`, `public/logo-white.png`).
 - [ ] Compléter les `[À compléter]` des pages **Mentions légales** et **Politique de confidentialité**, et les faire relire.
 
-## Déploiement Cloudflare (Workers + OpenNext)
+## Déploiement Cloudflare Pages
 
-`wrangler.jsonc` + `open-next.config.ts` (adaptateur `@opennextjs/cloudflare`, nécessaire pour `/api/lead` et `/api/geo`).
+Le site est exporté en fichiers statiques (`out/`) et les deux routes serveur tournent en **Pages Functions** (`functions/api/lead.ts`, `functions/api/geo.ts`), qui partagent la logique de `src/lib/lead.ts` et `src/lib/market.ts` avec les routes Next.js (`src/app/api/*`, utilisées seulement sur un hébergeur Node avec `next start`).
 
-- **Build command** : `npx opennextjs-cloudflare build` · **Deploy** : `npx wrangler deploy` · **Preview** : `npx wrangler versions upload`
-- **Variables d'exécution** (Worker > Settings > Variables and Secrets, type *Secret* pour les clés) : `LEAD_WEBHOOK_URL`, `GHL_*`, `GHL_*_MA`, `GHL_SEND_DIRECT`.
-- **Variables de build** (Settings > Build > Variables) : toutes les `NEXT_PUBLIC_*` (lues au build).
-- Le pays vient uniquement de l'en-tête `cf-ipcountry` ajouté par Cloudflare (`GEO_HEADER` dans `wrangler.jsonc`) : les autres en-têtes ne sont pas fiables sur Cloudflare.
-- **Next.js est figé en 16.3.8** : avec 16.4, l'adaptateur OpenNext 1.20 ne gère pas le nouveau fichier `preview-props.json` et le Worker plante (erreur 1101, `Unexpected loadManifest`). Ne pas mettre Next à jour avant une version d'OpenNext qui le corrige.
-- Test local : `npm run preview` (variables dans `.dev.vars`, non commité).
+- **Build command** : `npm run build` · **Build output directory** : `out` (Pages définit `CF_PAGES=1`, ce qui active l'export statique dans `next.config.ts`).
+- **Variables** (Settings > Variables and Secrets, pour Production) : `LEAD_WEBHOOK_URL`, `GHL_*`, `GHL_*_MA`, `GHL_SEND_DIRECT` (type *Secret* pour les clés) + toutes les `NEXT_PUBLIC_*` (lues au build). Redéployer après modification.
+- **Pays** : `request.cf.country`, calculé par Cloudflare depuis l'IP — un visiteur ne peut pas le falsifier avec un en-tête.
+- **Sous-domaine** : Custom domains > `platform.clientx.ai`, puis chez GoDaddy un enregistrement `CNAME` `platform` → `<projet>.pages.dev`. Aucun autre changement DNS.
+- **Test local** : `STATIC_EXPORT=1 npm run build` puis `npm run pages:dev` (variables dans `.dev.vars`, non commité).
