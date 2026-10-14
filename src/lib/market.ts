@@ -18,6 +18,13 @@ const isCountry = (v?: string | null): v is string => !!v && /^[A-Z]{2}$/i.test(
 
 /** Country from the header set by the host edge (Netlify, Vercel or Cloudflare). Null when there is none (local dev). */
 export function countryFromHeaders(h: Headers): string | null {
+  // When the host is known (e.g. GEO_HEADER=cf-ipcountry on Cloudflare), trust only its header:
+  // the others are not overwritten there, so a visitor could send them to pick a market.
+  const only = process.env.GEO_HEADER?.trim().toLowerCase();
+  if (only) {
+    const v = only === "x-nf-geo" ? netlifyCountry(h) : h.get(only);
+    return isCountry(v) ? v.toUpperCase() : null;
+  }
   const raw =
     netlifyCountry(h) ??
     h.get("x-vercel-ip-country") ??

@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // Must match the project name in the Cloudflare dashboard.
-  "name": "clientx-crm-lp",
+  "name": "clientx-plaform",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -9,6 +9,8 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Country comes only from the header Cloudflare sets from the visitor's IP.
+  "vars": { "GEO_HEADER": "cf-ipcountry" },
   // Keep variables set in the Cloudflare dashboard (GHL keys, webhook) on each deploy.
   "keep_vars": true,
   "observability": { "enabled": true }

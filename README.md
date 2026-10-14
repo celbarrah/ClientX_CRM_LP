@@ -58,5 +58,6 @@ npm run build && npm start   # production
 - **Build command** : `npx opennextjs-cloudflare build` · **Deploy** : `npx wrangler deploy` · **Preview** : `npx wrangler versions upload`
 - **Variables d'exécution** (Worker > Settings > Variables and Secrets, type *Secret* pour les clés) : `LEAD_WEBHOOK_URL`, `GHL_*`, `GHL_*_MA`, `GHL_SEND_DIRECT`.
 - **Variables de build** (Settings > Build > Variables) : toutes les `NEXT_PUBLIC_*` (lues au build).
-- Le pays vient de l'en-tête `cf-ipcountry` ajouté par Cloudflare.
-- Le build OpenNext n'est pas supporté sous Windows (erreur `Unexpected loadManifest`) : tester localement via WSL, ou laisser Cloudflare builder (Linux).
+- Le pays vient uniquement de l'en-tête `cf-ipcountry` ajouté par Cloudflare (`GEO_HEADER` dans `wrangler.jsonc`) : les autres en-têtes ne sont pas fiables sur Cloudflare.
+- **Next.js est figé en 16.3.8** : avec 16.4, l'adaptateur OpenNext 1.20 ne gère pas le nouveau fichier `preview-props.json` et le Worker plante (erreur 1101, `Unexpected loadManifest`). Ne pas mettre Next à jour avant une version d'OpenNext qui le corrige.
+- Test local : `npm run preview` (variables dans `.dev.vars`, non commité).
