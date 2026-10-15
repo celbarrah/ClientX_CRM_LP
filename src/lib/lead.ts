@@ -31,16 +31,19 @@ export async function handleLead(req: Request, env: Env, ipCountry: string | nul
   // GHL_API_BASE is only overridden for local testing against a mock.
   const ctx: Ctx = { market, country, ghl: ghlConfig(env, market), api: env.GHL_API_BASE || GHL_DEFAULT };
 
-  const jobs: Promise<string>[] = [];
   const hook = env.LEAD_WEBHOOK_URL?.trim();
+  const canGhl = Boolean(ctx.ghl.privateKey && ctx.ghl.subaccountId);
+  // n8n test URLs only accept one call after "Execute workflow" is clicked: every other lead is rejected.
+  if (hook?.includes("/webhook-test/")) console.error("[lead] LEAD_WEBHOOK_URL is an n8n TEST url — use the /webhook/ production url");
+
+  const jobs: Promise<string>[] = [];
   if (hook) jobs.push(sendWebhook(hook, lead, ctx));
   // By default the webhook workflow talks to GHL with the credentials it receives.
   // Set GHL_SEND_DIRECT=true to also push the contact from here (would duplicate it if the workflow does too).
-  if (env.GHL_SEND_DIRECT === "true" && ctx.ghl.privateKey && ctx.ghl.subaccountId) {
-    jobs.push(sendToGhl(lead, ctx));
-  }
+  const direct = env.GHL_SEND_DIRECT === "true" && canGhl;
+  if (direct) jobs.push(sendToGhl(lead, ctx));
 
-  if (!jobs.length) {
+  if (!jobs.length && !canGhl) {
     console.error("[lead] no destination configured (LEAD_WEBHOOK_URL / GHL_*) — lead lost:", lead.email);
     return Response.json({ ok: false, error: "not_configured" }, { status: 500 });
   }
@@ -49,7 +52,22 @@ export async function handleLead(req: Request, env: Env, ipCountry: string | nul
   results.forEach((r) => r.status === "rejected" && console.error("[lead]", r.reason));
   // The lead is safe as soon as one destination accepted it.
   const delivered = results.filter((r) => r.status === "fulfilled").map((r) => (r as PromiseFulfilledResult<string>).value);
-  if (!delivered.length) return Response.json({ ok: false, error: "upstream" }, { status: 502 });
+
+  // Safety net: the webhook is missing or refused the lead and GHL wasn't already called directly,
+  // so create the contact in GHL from here rather than losing it.
+  if (!delivered.length && !direct && canGhl) {
+    console.error("[lead] webhook failed — falling back to GHL directly for", lead.email);
+    try {
+      delivered.push(await sendToGhl(lead, ctx));
+    } catch (e) {
+      console.error("[lead] GHL fallback failed:", e);
+    }
+  }
+  if (!delivered.length) {
+    // Logged in full so the lead can still be recovered from the host's logs.
+    console.error("[lead] LEAD NOT DELIVERED:", JSON.stringify({ ...lead, market, submitted_at: new Date().toISOString() }));
+    return Response.json({ ok: false, error: "upstream" }, { status: 502 });
+  }
 
   // `market` tells the form which thank-you page to open (/merci or /merci-maroc).
   return Response.json({ ok: true, delivered, market });

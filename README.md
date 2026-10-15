@@ -26,6 +26,7 @@ npm run build && npm start   # production
 2. **Étape 2** → envoi unique, en parallèle :
    - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` du marché (JSON uniquement) pour que le workflow appelle le bon compte GHL ;
    - optionnel : `GHL_SEND_DIRECT=true` fait aussi créer le contact dans GHL par le site (tags, note d'attribution, inscription au workflow) — à éviter si le workflow le fait déjà.
+   - **filet de sécurité** : si le webhook est absent ou refuse le lead (ex. URL n8n `/webhook-test/`), le contact est créé directement dans GHL avec les identifiants du marché. Toujours utiliser l'URL de **production** `/webhook/…`.
 3. Redirection vers `/merci` (global) ou `/merci-maroc` (IP au Maroc) — textes dans `THANK_YOU` (`content.ts`) — qui déclenche la conversion (`generate_lead` dans le dataLayer avec `lead_market` = `MA` / `global`, `Lead` Meta) — une seule fois par envoi.
 
 **Attribution** : `utm_source, utm_medium, utm_campaign, utm_term, utm_content, utm_id, gclid, gbraid, wbraid, fbclid, msclkid, ttclid` + `landing_page`, `referrer`, `fbp`/`fbc`. Conservés pour la session (le visiteur peut naviguer avant de convertir).
@@ -34,7 +35,7 @@ npm run build && npm start   # production
 
 **Chat** : bulle LeadConnector via `NEXT_PUBLIC_CHAT_WIDGET_ID` (global) et `NEXT_PUBLIC_CHAT_WIDGET_ID_MA` (visiteurs au Maroc, détectés par IP). Chargée à la première interaction ou après 3,5 s pour ne pas ralentir l'affichage. Laisser vide pour désactiver.
 
-**Tracking** : `NEXT_PUBLIC_GOOGLE_TAG_ID` accepte un ID GTM (`GTM-…`) ou un Google tag (`G-…` / `AW-…`). `NEXT_PUBLIC_META_PIXEL_ID` charge le Pixel (PageView + Lead). Les variables `NEXT_PUBLIC_*` sont lues au build : relancer `npm run build` après modification.
+**Tracking** : `NEXT_PUBLIC_GOOGLE_TAG_ID` accepte un ID GTM (`GTM-…`) ou un Google tag (`G-…` / `AW-…`). `NEXT_PUBLIC_META_PIXEL_ID` charge le Pixel (PageView + Lead). Les variables `NEXT_PUBLIC_*` sont lues au build : relancer `npm run build` après modification. Quand le Pixel vient de GTM (`NEXT_PUBLIC_META_PIXEL_ID` vide), le site n'appelle jamais `fbq` lui-même : GTM gère seul les événements Meta à partir du dataLayer (sinon chaque Lead est compté deux fois).
 
 **Tarifs** : prix en € pour tous ; les visiteurs détectés au Maroc (IP via `/api/geo` : en-tête Netlify `x-nf-geo`, Vercel `x-vercel-ip-country` ou Cloudflare `cf-ipcountry`) voient les prix MAD par défaut et un sélecteur €/MAD. Prix dans `PRICING` (`content.ts`). Test : ajouter `?pays=MA` ou `?pays=FR` à l'URL.
 

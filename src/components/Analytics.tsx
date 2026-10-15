@@ -79,6 +79,13 @@ function whenTagsReady(fire: (w: Win) => void) {
   attempt();
 }
 
+/**
+ * Meta events are sent from this code only when this code loaded the pixel (NEXT_PUBLIC_META_PIXEL_ID).
+ * When the pixel comes from GTM, GTM owns the Meta events (it listens to the dataLayer events below):
+ * calling its `fbq` from here as well would count every event twice.
+ */
+const sitePixel = (w: Win) => (META_PIXEL_ID ? w.fbq : undefined);
+
 function pushDataLayer(data: Record<string, unknown>) {
   const w = window as Win;
   w.dataLayer = w.dataLayer || [];
@@ -93,7 +100,7 @@ export function trackFormStep(step: number, stepName: string, totalSteps = 2) {
   const params = { form_name: "demo", form_step: step, form_step_name: stepName, form_total_steps: totalSteps };
   pushDataLayer({ event: "form_step_complete", ...params });
   whenTagsReady((w) => {
-    w.fbq?.("trackCustom", "FormStepComplete", params);
+    sitePixel(w)?.("trackCustom", "FormStepComplete", params);
     if (!isGTM) w.gtag?.("event", "form_step_complete", params);
   });
 }
@@ -110,7 +117,7 @@ export function trackFormSubmit(data: { sector?: string; teamSize?: string; mark
   const params = { form_name: "demo", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: maroc ? "MA" : "global" };
   pushDataLayer({ event: name, ...params });
   whenTagsReady((w) => {
-    w.fbq?.("trackCustom", metaName, params);
+    sitePixel(w)?.("trackCustom", metaName, params);
     if (!isGTM) w.gtag?.("event", name, params);
   });
 }
@@ -119,7 +126,7 @@ export function trackFormSubmit(data: { sector?: string; teamSize?: string; mark
 export function trackLead(data: { sector?: string; teamSize?: string; market?: string }) {
   pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: data.market });
   whenTagsReady((w) => {
-    w.fbq?.("track", "Lead", { content_category: data.sector });
+    sitePixel(w)?.("track", "Lead", { content_category: data.sector });
     if (!isGTM) w.gtag?.("event", "generate_lead", { lead_sector: data.sector });
   });
 }
