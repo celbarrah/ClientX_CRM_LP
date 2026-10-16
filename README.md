@@ -26,6 +26,7 @@ npm run build && npm start   # production
 2. **Étape 2** → envoi unique, en parallèle :
    - au webhook `LEAD_WEBHOOK_URL` : lead + UTM (dans le JSON **et** en paramètres d'URL) + `private_integration_key`, `subaccount_id`, `workflow_id` du marché (JSON uniquement) pour que le workflow appelle le bon compte GHL ;
    - optionnel : `GHL_SEND_DIRECT=true` fait aussi créer le contact dans GHL par le site (tags, note d'attribution, inscription au workflow) — à éviter si le workflow le fait déjà.
+   - **Notification Google Chat** envoyée par le site après le webhook, dans le space du marché (`GOOGLE_CHAT_WEBHOOK_URL_MA` au Maroc, sinon `GOOGLE_CHAT_WEBHOOK_URL`) : toutes les infos du lead + UTM + lien `https://crm.clientx.ai/v2/location/{subaccount}/contacts/detail/{contact}`. L'ID du contact vient de la **réponse du webhook n8n** (nœud *Respond to Webhook* renvoyant `{"contact_id": "…"}`, ou la sortie du nœud GHL) ou de GHL en cas de filet de sécurité.
    - **filet de sécurité** : si le webhook est absent ou refuse le lead (ex. URL n8n `/webhook-test/`), le contact est créé directement dans GHL avec les identifiants du marché. Toujours utiliser l'URL de **production** `/webhook/…`.
 3. Redirection vers `/merci` (global) ou `/merci-maroc` (IP au Maroc) — textes dans `THANK_YOU` (`content.ts`) — qui déclenche la conversion (`generate_lead` dans le dataLayer avec `lead_market` = `MA` / `global`, `Lead` Meta) — une seule fois par envoi.
 

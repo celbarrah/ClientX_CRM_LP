@@ -53,3 +53,9 @@ export function ghlConfig(env: Env, market: Market) {
     workflowId: get(`GHL_WORKFLOW_ID${suffix}`),
   } as const;
 }
+
+/** Google Chat incoming-webhook URL for a market, passed to n8n so it can notify the right space. */
+export function chatWebhook(env: Env, market: Market) {
+  const get = (k: string) => env[k]?.trim() || "";
+  return (market === "MA" && get("GOOGLE_CHAT_WEBHOOK_URL_MA")) || get("GOOGLE_CHAT_WEBHOOK_URL");
+}

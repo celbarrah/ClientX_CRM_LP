@@ -2,7 +2,8 @@
 // Items marked PLACEHOLDER must be replaced with real client data before going live.
 
 export const DEMO_VIDEO =
-  "https://assets.cdn.filesafe.space/zoW9RVMsMP37fO8WXMgD/media/7a3c0f19-4e92-49b4-a9b2-2a7f4f0e5181.mp4#t=0.5";
+  // #t=0.5 shows a frame of the video as its thumbnail before play.
+  "https://res.cloudinary.com/dofyrwzop/video/upload/v1792158049/Explainer_V2_AI_Employee_1__fr-FR_dubbed_a8ogus.mp4#t=0.5";
 
 export const CTA = {
   primary: "Réserver une Démo",
