@@ -212,6 +212,8 @@ const UTM_LABELS: [string, string][] = [
   ["utm_content", "Contenu / annonce"],
   ["utm_term", "Terme"],
   ["utm_id", "ID campagne"],
+  ["gclid", "Google Ads (gclid)"],
+  ["fbclid", "Meta (fbclid)"],
 ];
 
 /** Visitor text can't inject Google Chat links (`<url|text>`); other characters are kept (emails, URLs). */
