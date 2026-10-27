@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhone } from "./phone";
 
 export const SECTORS = [
   "Assurance & Banque",
@@ -18,10 +19,8 @@ export const stepOneSchema = z.object({
   firstName: z.string().trim().min(2, "Prénom requis"),
   lastName: z.string().trim().min(2, "Nom requis"),
   email: z.email("E-mail invalide"),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9 ().-]{8,20}$/, "Numéro invalide"),
+  // Always sent as E.164 ("+212691357226"): the form builds it from the country selector + the number.
+  phone: z.string().trim().refine(isValidPhone, "Numéro invalide : vérifiez le pays et le nombre de chiffres"),
 });
 
 export const stepTwoSchema = z.object({

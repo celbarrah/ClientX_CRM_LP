@@ -13,6 +13,21 @@ function fromTimezone(): string | null {
   return null;
 }
 
+/**
+ * Best answer available right now, without waiting for the network: the ?pays= override, the country
+ * already detected earlier in this visit, else a Moroccan timezone. Null when only the IP lookup can tell.
+ * Lets the UI show the right country on its first paint instead of switching a moment later.
+ */
+export function knownCountry(): string | null {
+  try {
+    const forced = new URLSearchParams(window.location.search).get("pays");
+    if (forced && /^[A-Z]{2}$/i.test(forced)) return forced.toUpperCase();
+    const cached = sessionStorage.getItem(KEY);
+    if (cached) return cached;
+  } catch {}
+  return fromTimezone();
+}
+
 export function detectCountry(): Promise<string | null> {
   if (pending) return pending;
   pending = (async () => {

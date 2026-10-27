@@ -30,6 +30,8 @@ npm run build && npm start   # production
    - **filet de sécurité** : si le webhook est absent ou refuse le lead (ex. URL n8n `/webhook-test/`), le contact est créé directement dans GHL avec les identifiants du marché. Toujours utiliser l'URL de **production** `/webhook/…`.
 3. Redirection vers `/merci` (global) ou `/merci-maroc` (IP au Maroc) — textes dans `THANK_YOU` (`content.ts`) — qui déclenche la conversion (`generate_lead` dans le dataLayer avec `lead_market` = `MA` / `global`, `Lead` Meta) — une seule fois par envoi.
 
+**Téléphone** : sélecteur de pays (pré-rempli selon l'IP du visiteur) + chiffres uniquement ; toujours envoyé au format international sans espace (`+212691357226`). Les saisies `06…`, `2126…`, `+2126…`, `00212…` sont corrigées automatiquement ; liste des pays et règles dans `src/lib/phone.ts`.
+
 **Attribution** : `utm_source, utm_medium, utm_campaign, utm_term, utm_content, utm_id, gclid, gbraid, wbraid, fbclid, msclkid, ttclid` + `landing_page`, `referrer`, `fbp`/`fbc`. Conservés pour la session (le visiteur peut naviguer avant de convertir).
 
 **Événements formulaire** : `form_step_complete` (dataLayer / Google) et `FormStepComplete` (Meta, événement personnalisé) à chaque étape validée — paramètres `form_name`, `form_step` (1 ou 2), `form_step_name` (`coordonnees`, `entreprise`), `form_total_steps`. Une seule fois par étape, aucune donnée personnelle. Puis `generate_lead` / `Lead` sur `/merci`.

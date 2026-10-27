@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,8 +10,9 @@ import { SECTORS, TEAM_SIZES, stepOneSchema, stepTwoSchema } from "@/lib/schema"
 import { CTA, THANK_YOU } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { getAttribution } from "@/lib/attribution";
-import { detectCountry } from "@/lib/geo";
+import { detectCountry, knownCountry } from "@/lib/geo";
 import { trackFormStep, trackFormSubmit } from "@/components/Analytics";
+import { PHONE_COUNTRIES, OTHER, findCountry, normalizePhone, phoneHint } from "@/lib/phone";
 
 const formSchema = stepOneSchema.extend(stepTwoSchema.shape).extend({ website: z.string().optional() });
 type FormValues = z.infer<typeof formSchema>;
@@ -51,7 +52,38 @@ export function DemoForm() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(formSchema), mode: "onTouched" });
+  } = useForm<FormValues>({ resolver: zodResolver(formSchema), mode: "onTouched", defaultValues: { phone: "" } });
+
+  // Phone: country selector (preset from the visitor's IP country) + digits only.
+  // The form value is always the E.164 number ("+212691357226") built from both.
+  // No default country: the selector stays blank (space reserved) until the real one is known,
+  // so a Moroccan visitor never sees +33 switch to +212.
+  const [detected, setPhoneCountry] = useState<string | null>(null);
+  const phoneCountry = detected ?? "FR";
+  const [phoneDigits, setPhoneDigits] = useState("");
+  const countryPicked = useRef(false);
+  // Layout effect: runs before the browser paints, so an already-known country shows on the first frame.
+  useLayoutEffect(() => {
+    const now = findCountry(knownCountry());
+    if (now) setPhoneCountry(now.code);
+    detectCountry()
+      .then((c) => {
+        if (countryPicked.current) return;
+        // Country outside the list: "Autre pays", where the visitor types the full international number.
+        setPhoneCountry(findCountry(c)?.code ?? (c ? OTHER : now?.code ?? "FR"));
+      })
+      .catch(() => setPhoneCountry((v) => v ?? "FR"));
+  }, []);
+  const updatePhone = (raw: string, country: string, opts: { tidy?: boolean } = {}) => {
+    const n = normalizePhone(raw, country);
+    if (n.country !== country) {
+      countryPicked.current = true;
+      setPhoneCountry(n.country);
+    }
+    // While typing, keep what was typed (digits only, so a leading 0 stays visible); tidy up on blur/paste.
+    setPhoneDigits(opts.tidy ? n.national : raw.replace(/\D/g, "").slice(0, 15));
+    setValue("phone", n.e164, { shouldValidate: Boolean(errors.phone) || opts.tidy });
+  };
 
   const teamSize = watch("teamSize");
 
@@ -123,8 +155,19 @@ export function DemoForm() {
                   <Field label="E-mail professionnel" error={errors.email?.message}>
                     <input {...register("email")} type="email" autoComplete="email" inputMode="email" placeholder="sarah@entreprise.com" className={inputCls(!!errors.email)} />
                   </Field>
-                  <Field label="Téléphone" error={errors.phone?.message}>
-                    <input {...register("phone")} type="tel" autoComplete="tel" inputMode="tel" placeholder="+33 6 12 34 56 78" className={inputCls(!!errors.phone)} />
+                  <Field group label="Téléphone" error={errors.phone?.message} hint={errors.phone ? phoneHint(phoneCountry) : undefined}>
+                    <PhoneInput
+                      country={detected}
+                      digits={phoneDigits}
+                      invalid={!!errors.phone}
+                      onCountry={(c) => {
+                        countryPicked.current = true;
+                        setPhoneCountry(c);
+                        updatePhone(phoneDigits, c, { tidy: phoneDigits.length > 0 });
+                      }}
+                      onInput={(raw, pasted) => updatePhone(raw, phoneCountry, { tidy: pasted })}
+                      onBlur={() => updatePhone(phoneDigits, phoneCountry, { tidy: true })}
+                    />
                   </Field>
                   <button type="button" onClick={next} className={submitCls}>
                     Continuer
@@ -221,13 +264,97 @@ const inputCls = (invalid: boolean) =>
 const submitCls =
   "group mt-1 inline-flex h-14 w-full items-center justify-between rounded-full bg-ink pl-6 pr-2.5 text-[15px] font-medium text-white hover:shadow-glow disabled:opacity-80";
 
-function Field({ label, error, group, children }: { label: string; error?: string; group?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  error,
+  hint,
+  group,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  group?: boolean;
+  children: React.ReactNode;
+}) {
   const Tag = group ? "div" : "label";
   return (
     <Tag className="grid gap-1.5">
       <span className="text-[13px] font-medium text-ink-soft">{label}</span>
       {children}
-      {error && <span className="text-[12px] text-red-500">{error}</span>}
+      {error && (
+        <span className="text-[12px] text-red-500">
+          {error}
+          {hint && <span className="text-muted"> ({hint})</span>}
+        </span>
+      )}
     </Tag>
+  );
+}
+
+/**
+ * Country selector + national number. Digits only: letters, spaces and symbols are dropped as they are typed.
+ * A pasted number keeps its own country code ("+33 6…" switches the selector to France).
+ */
+function PhoneInput({
+  country,
+  digits,
+  invalid,
+  onCountry,
+  onInput,
+  onBlur,
+}: {
+  country: string | null; // null while the visitor's country is still being detected
+  digits: string;
+  invalid: boolean;
+  onCountry: (code: string) => void;
+  onInput: (raw: string, pasted: boolean) => void;
+  onBlur: () => void;
+}) {
+  const c = country ? findCountry(country) : undefined;
+  return (
+    <div
+      className={cn(
+        "flex h-12 w-full items-stretch rounded-xl border bg-canvas text-[15px] focus-within:border-ink focus-within:shadow-[0_0_0_4px_rgb(50_220_50/0.22)]",
+        invalid ? "border-red-400" : "border-line-strong hover:border-ink/30",
+      )}
+    >
+      {/* Native select (accessible, light) under a compact "MA +212" label */}
+      <div className="relative flex shrink-0 items-center gap-1 border-r border-line-strong pl-3.5 pr-2.5">
+        <span aria-hidden className={cn("font-medium tabular-nums text-ink", !country && "invisible")}>
+          {c ? `${c.code} +${c.dial}` : country ? "+…" : "FR +33"}
+        </span>
+        <ChevronDown aria-hidden className="size-3.5 text-muted" />
+        <select
+          aria-label="Pays de l'indicatif"
+          value={c ? c.code : OTHER}
+          onChange={(e) => onCountry(e.target.value)}
+          className="absolute inset-0 cursor-pointer opacity-0"
+        >
+          {PHONE_COUNTRIES.map((p) => (
+            <option key={p.code} value={p.code}>
+              {p.name} (+{p.dial})
+            </option>
+          ))}
+          <option value={OTHER}>Autre pays (indicatif complet)</option>
+        </select>
+      </div>
+      <input
+        type="tel"
+        inputMode="numeric"
+        autoComplete="tel-national"
+        aria-label="Numéro de téléphone"
+        placeholder={c ? c.example : country ? "Indicatif + numéro" : ""}
+        value={digits}
+        maxLength={16}
+        onChange={(e) => onInput(e.target.value, false)}
+        onPaste={(e) => {
+          e.preventDefault();
+          onInput(e.clipboardData.getData("text"), true);
+        }}
+        onBlur={onBlur}
+        className="min-w-0 flex-1 rounded-r-xl bg-transparent px-3.5 tabular-nums text-ink outline-none placeholder:text-ink/30"
+      />
+    </div>
   );
 }
