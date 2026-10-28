@@ -82,6 +82,14 @@ export async function handleLead(req: Request, env: Env, ipCountry: string | nul
 
 /* ---------- Webhook ---------- */
 
+// Always present in the webhook body (empty when the visit had no such parameter),
+// so the n8n mappings never point at a missing field.
+const ALWAYS_SENT = Object.fromEntries(
+  ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "utm_id", "matchtype", "network", "gclid", "fbclid"].map(
+    (k) => [k, ""],
+  ),
+);
+
 async function sendWebhook(url: string, lead: Lead, ctx: Ctx): Promise<Delivery> {
   const utm = lead.utm ?? {};
   // UTMs travel both in the query string and in the JSON body.
@@ -101,6 +109,7 @@ async function sendWebhook(url: string, lead: Lead, ctx: Ctx): Promise<Delivery>
       team_size: lead.teamSize,
       source: SOURCE,
       page: lead.page,
+      ...ALWAYS_SENT,
       ...utm,
       submitted_at: new Date().toISOString(),
       // GHL credentials for the receiving workflow. Body only, never in the URL (URLs get logged).
@@ -212,6 +221,8 @@ const UTM_LABELS: [string, string][] = [
   ["utm_content", "Contenu / annonce"],
   ["utm_term", "Terme"],
   ["utm_id", "ID campagne"],
+  ["matchtype", "Type de correspondance"],
+  ["network", "Réseau"],
   ["gclid", "Google Ads (gclid)"],
   ["fbclid", "Meta (fbclid)"],
 ];
