@@ -7,7 +7,9 @@ import { captureAttribution } from "@/lib/attribution";
 // IDs are injected into inline scripts, so only allow their expected characters.
 const clean = (v?: string) => v?.trim().replace(/[^A-Za-z0-9-]/g, "") || undefined;
 const GOOGLE_TAG_ID = clean(process.env.NEXT_PUBLIC_GOOGLE_TAG_ID);
-const META_PIXEL_ID = clean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+// One or more Meta pixels, comma-separated ("1250950373673981,1101284526029680"): all get the same events.
+const META_PIXEL_IDS = (process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "").split(",").map(clean).filter((id): id is string => !!id);
+const META_PIXEL_ID = META_PIXEL_IDS.length > 0;
 const isGTM = GOOGLE_TAG_ID?.startsWith("GTM-");
 
 /**
@@ -38,7 +40,7 @@ export function Analytics() {
 
       {META_PIXEL_ID && (
         <Script id="meta-pixel" strategy="afterInteractive">
-          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`}
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');${META_PIXEL_IDS.map((id) => `fbq('init','${id}');`).join("")}fbq('track','PageView');`}
         </Script>
       )}
     </>
@@ -80,9 +82,10 @@ function whenTagsReady(fire: (w: Win) => void) {
 }
 
 /**
- * Meta events are sent from this code only when this code loaded the pixel (NEXT_PUBLIC_META_PIXEL_ID).
- * When the pixel comes from GTM, GTM owns the Meta events (it listens to the dataLayer events below):
- * calling its `fbq` from here as well would count every event twice.
+ * Meta events are sent from this code only when this code loaded the pixels (NEXT_PUBLIC_META_PIXEL_ID).
+ * Then the Meta tags in GTM must stay paused, or every event counts twice.
+ * Without it, GTM owns the Meta events (it listens to the dataLayer events below).
+ * One fbq('track', …) call reaches every initialised pixel.
  */
 const sitePixel = (w: Win) => (META_PIXEL_ID ? w.fbq : undefined);
 
