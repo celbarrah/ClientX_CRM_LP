@@ -46,6 +46,19 @@ npm run build && npm start   # production
 
 **Performance** : aucune animation d'entrée ni défilement JS (pas de Lenis / Motion) — défilement natif, sections affichées immédiatement. Seuls restent les survols, la bande de logos et la barre de progression des modules (CSS).
 
+## Candidatures partenaires
+
+- Formulaire de `/partenaires` et `/en/partners` → `/api/partner` (`src/lib/partner.ts`) : contact GoHighLevel (compte Maroc ou global selon l'IP), tags « ClientX Partner Program » + formule + Maroc/Global, et une note.
+- **Notification Google Chat** dans le space partenaires `GOOGLE_CHAT_WEBHOOK_URL_PARTNERS` (un seul space pour tous les marchés) : formule, nom, e-mail, téléphone, société, site, audience, pays (IP), langue du site, UTM, date et lien du contact. Envoyée aussi si le CRM échoue, avec un avertissement, pour ne perdre aucune candidature. Variable vide = pas de notification.
+
+## Version anglaise
+
+- **Qui la voit** : les visiteurs hors France et Maroc (pays de l'IP), règle dans `src/lib/lang.ts`. En production : Pages Functions `functions/index.ts`, `functions/en/*.ts`… (une par page) ; en local : `src/proxy.ts`.
+- **Pages** : `/en`, `/en/partners`, `/en/legal-notice`, `/en/privacy-policy`, `/en/thank-you`, `/en/thank-you-morocco`.
+- **Textes** : `src/lib/content.en.ts` (même structure que `content.ts` ; prix, liens de paiement, logos et contacts sont repris du fichier français). Les textes d'interface des composants sont dans `UI` des deux fichiers.
+- **Tests** : `?lang=en` / `?lang=fr` force la langue (mémorisée dans le cookie `cx_lang`, comme le sélecteur FR/EN) ; `?pays=US` simule un visiteur hors France/Maroc, `?pays=FR` / `?pays=MA` restent en français. Le choix mémorisé passe avant `?pays=` : utiliser `?lang=fr` pour revenir.
+- Les valeurs envoyées au CRM (secteur, formule partenaire) restent en français dans les deux versions.
+
 ## Avant la mise en ligne
 
 - [ ] Bannière de consentement cookies (RGPD/CNIL) avant d'activer GTM et le Pixel Meta.

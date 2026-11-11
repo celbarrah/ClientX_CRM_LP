@@ -2,26 +2,28 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { FAQ, CONTACT } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Reveal, SectionHeading, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-export function Faq({ items = FAQ }: { items?: readonly { q: string; a: string }[] }) {
+export function Faq({ items, lang = "fr" }: { items?: readonly { q: string; a: string }[]; lang?: Lang }) {
+  const { FAQ, CONTACT, UI } = copy(lang);
+  const list = items ?? FAQ;
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section id="faq" className="scroll-mt-24 pb-24 pt-8 sm:pb-32 sm:pt-12">
       <div className="container-x grid grid-cols-1 gap-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <SectionHeading align="left" eyebrow="FAQ" title="Vos questions," accent="nos réponses" />
+          <SectionHeading align="left" eyebrow={UI.faq.eyebrow} title={UI.faq.title} accent={UI.faq.accent} />
           <Reveal delay={0.1} className="mt-8 flex flex-wrap items-center gap-3 text-muted">
-            Une autre question ?
+            {UI.faq.other}
             <a href={`mailto:${CONTACT.email}`}>
               <Sticker rotate={-3}>{CONTACT.email}</Sticker>
             </a>
           </Reveal>
         </div>
         <div className="border-b border-line-strong lg:col-span-7">
-          {items.map((f, i) => {
+          {list.map((f, i) => {
             const isOpen = open === i;
             return (
               <Reveal key={f.q} delay={i * 0.06} className="border-t border-line-strong">

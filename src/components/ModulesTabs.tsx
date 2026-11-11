@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import { MODULES, CTA } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Accent, Button, Eyebrow, Reveal, Sticker } from "@/components/ui";
 import { ModuleMock } from "@/components/mocks";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 const DURATION = 7000;
 
 /** All six modules in one interactive section (replaces the engine + six alternating blocks). */
-export function ModulesTabs() {
+export function ModulesTabs({ lang = "fr" }: { lang?: Lang }) {
+  const { MODULES, CTA, UI } = copy(lang);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -30,7 +31,7 @@ export function ModulesTabs() {
     if (!running) return;
     const t = setTimeout(() => setActive((a) => (a + 1) % MODULES.length), DURATION);
     return () => clearTimeout(t);
-  }, [active, running]);
+  }, [active, running, MODULES.length]);
 
   const m = MODULES[active];
 
@@ -38,9 +39,9 @@ export function ModulesTabs() {
     <section id="modules" className="relative scroll-mt-24 py-24 sm:py-32">
       <div className="container-x">
         <Reveal className="flex flex-col items-center text-center">
-          <Eyebrow>Capturer → Nourrir → Conclure</Eyebrow>
+          <Eyebrow>{UI.modules.eyebrow}</Eyebrow>
           <h2 className="mt-6 max-w-3xl text-balance text-[2.4rem] font-semibold leading-[1] tracking-[-0.045em] sm:text-6xl">
-            Une plateforme, <Accent>six super-pouvoirs</Accent>
+            {UI.modules.title} <Accent>{UI.modules.accent}</Accent>
           </h2>
         </Reveal>
 
@@ -116,7 +117,7 @@ export function ModulesTabs() {
                 </Sticker>
               </div>
               <div className="relative min-h-[340px] pt-10 sm:min-h-[400px]">
-                <ModuleMock name={m.key} />
+                <ModuleMock name={m.key} t={UI.mocks} />
               </div>
             </div>
 

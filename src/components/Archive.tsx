@@ -6,7 +6,8 @@ import {
   ArrowLeft, ArrowRight, ArrowUpRight, Building2, Car, Dumbbell, GraduationCap, Home,
   ShoppingBag, Sun, UtensilsCrossed, X, type LucideIcon,
 } from "lucide-react";
-import { USE_CASES, CTA, type SectorKey } from "@/lib/content";
+import type { SectorKey } from "@/lib/content";
+import { copy, type Copy, type Lang } from "@/lib/i18n";
 import { Accent, Eyebrow, Reveal, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -21,9 +22,11 @@ export const SECTOR_ICONS: Record<SectorKey, LucideIcon> = {
   bienetre: Dumbbell,
 };
 
-const TOTAL = USE_CASES.reduce((n, s) => n + s.cases.length, 0);
-
-export function Archive() {
+export function Archive({ lang = "fr" }: { lang?: Lang }) {
+  const c = copy(lang);
+  const { USE_CASES } = c;
+  const t = c.UI.archive;
+  const total = USE_CASES.reduce((n, s) => n + s.cases.length, 0);
   const [open, setOpen] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -43,7 +46,7 @@ export function Archive() {
       document.documentElement.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, USE_CASES.length]);
 
   return (
     <section id="cas-usage" className="scroll-mt-24 px-3 py-6 sm:px-4 sm:py-10">
@@ -53,23 +56,23 @@ export function Archive() {
 
       <div className="container-x">
         <Reveal className="flex flex-col items-center text-center">
-          <Eyebrow dark>Archives · Cas d&apos;usage</Eyebrow>
+          <Eyebrow dark>{t.eyebrow}</Eyebrow>
           <h2 className="mt-6 max-w-3xl text-balance text-[2.4rem] font-semibold leading-[1] tracking-[-0.045em] sm:text-6xl">
-            Ouvrez le dossier de <Accent dark>votre secteur</Accent>
+            {t.title} <Accent dark>{t.accent}</Accent>
           </h2>
           <p className="mt-5 max-w-lg text-white/55 sm:text-lg">
-            Des workflows concrets, déjà éprouvés. Cliquez sur un dossier pour l&apos;ouvrir.
+            {t.subtitle}
           </p>
           <div className="mt-6">
             <Sticker rotate={-4}>
-              {USE_CASES.length} secteurs · {TOTAL} cas d&apos;usage
+              {t.count(USE_CASES.length, total)}
             </Sticker>
           </div>
         </Reveal>
 
         <div className="mt-16 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-14 lg:grid-cols-4">
           {USE_CASES.map((s, i) => (
-            <Folder key={s.key} index={i} onOpen={() => setOpen(i)} />
+            <Folder key={s.key} index={i} c={c} onOpen={() => setOpen(i)} />
           ))}
         </div>
       </div>
@@ -77,21 +80,22 @@ export function Archive() {
 
       {mounted &&
         createPortal(
-          open !== null && <OpenedFolder index={open} setIndex={setOpen} />,
+          open !== null && <OpenedFolder index={open} c={c} setIndex={setOpen} />,
           document.body,
         )}
     </section>
   );
 }
 
-function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
-  const s = USE_CASES[index];
+function Folder({ index, c, onOpen }: { index: number; c: Copy; onOpen: () => void }) {
+  const t = c.UI.archive;
+  const s = c.USE_CASES[index];
   const Icon = SECTOR_ICONS[s.key];
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`Ouvrir le dossier ${s.sector}`}
+      aria-label={t.open(s.sector)}
       className="group relative block aspect-[5/4] w-full text-left [perspective:1100px]"
     >
       {/* Back panel + tab */}
@@ -110,7 +114,7 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
       <div
         className="transition-transform duration-300 [transform:rotate(3deg)] group-hover:[transform:translateY(-24%)_rotate(6deg)] absolute left-[24%] right-[8%] top-[10%] bottom-[30%] rounded-lg bg-canvas p-3 text-ink shadow-float"
       >
-        <p className="font-mono text-[9px] uppercase tracking-wider text-brand-deep">Cas 01</p>
+        <p className="font-mono text-[9px] uppercase tracking-wider text-brand-deep">{t.case} 01</p>
         <p className="mt-1 line-clamp-2 text-[11px] font-semibold leading-tight sm:text-[12px]">{s.cases[0].title}</p>
         <div className="mt-2 h-1 w-3/4 rounded-full bg-ink/10" />
         <div className="mt-1 h-1 w-1/2 rounded-full bg-ink/10" />
@@ -128,7 +132,7 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
         <p className="relative font-mono text-[9px] uppercase tracking-[0.14em] text-white/80 sm:text-[10px]">
-          {String(index + 1).padStart(2, "0")} — {s.cases.length} cas d&apos;usage
+          {String(index + 1).padStart(2, "0")} — {t.cases(s.cases.length)}
         </p>
         <p className="relative mt-1 text-balance pr-9 text-[15px] font-semibold leading-[1.05] tracking-[-0.02em] text-white drop-shadow sm:pr-11 sm:text-xl">
           {s.sector}
@@ -141,12 +145,14 @@ function Folder({ index, onOpen }: { index: number; onOpen: () => void }) {
   );
 }
 
-function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number | null) => void }) {
+function OpenedFolder({ index, c, setIndex }: { index: number; c: Copy; setIndex: (i: number | null) => void }) {
+  const { USE_CASES, CTA } = c;
+  const t = c.UI.archive;
   const s = USE_CASES[index];
   const Icon = SECTOR_ICONS[s.key];
   const go = useCallback(
     (d: number) => setIndex((index + d + USE_CASES.length) % USE_CASES.length),
-    [index, setIndex],
+    [index, setIndex, USE_CASES.length],
   );
 
   return (
@@ -155,7 +161,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
       onClick={() => setIndex(null)}
       role="dialog"
       aria-modal="true"
-      aria-label={`Cas d'usage — ${s.sector}`}
+      aria-label={t.dialog(s.sector)}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -172,7 +178,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
             </span>
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-deep">
-                Dossier {String(index + 1).padStart(2, "0")} / {String(USE_CASES.length).padStart(2, "0")}
+                {t.folder} {String(index + 1).padStart(2, "0")} / {String(USE_CASES.length).padStart(2, "0")}
               </p>
               <div>
                 <h3 className="mt-1 text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">{s.sector}</h3>
@@ -182,7 +188,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
           </div>
           <button
             onClick={() => setIndex(null)}
-            aria-label="Fermer"
+            aria-label={t.close}
             className="grid size-11 shrink-0 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white"
           >
             <X className="size-5" />
@@ -199,7 +205,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                    Cas {String(i + 1).padStart(2, "0")}
+                    {t.case} {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="size-2 rounded-full bg-brand" />
                 </div>
@@ -225,10 +231,10 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
         {/* Footer: navigation + CTA */}
         <div className="relative flex flex-col-reverse items-stretch gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-10">
           <div className="flex items-center gap-2">
-            <button onClick={() => go(-1)} aria-label="Dossier précédent" className="grid size-12 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
+            <button onClick={() => go(-1)} aria-label={t.prev} className="grid size-12 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
               <ArrowLeft className="size-4" />
             </button>
-            <button onClick={() => go(1)} aria-label="Dossier suivant" className="grid size-12 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
+            <button onClick={() => go(1)} aria-label={t.next} className="grid size-12 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
               <ArrowRight className="size-4" />
             </button>
             <span className="ml-2 text-sm text-muted">{USE_CASES[(index + 1) % USE_CASES.length].sector} →</span>
@@ -242,7 +248,7 @@ function OpenedFolder({ index, setIndex }: { index: number; setIndex: (i: number
             }}
             className="group inline-flex h-14 items-center justify-between gap-4 rounded-full bg-ink pl-6 pr-2 font-medium text-white transition-shadow hover:shadow-glow"
           >
-            {CTA.primary} pour ce secteur
+            {t.cta(CTA.primary)}
             <span className="grid size-10 place-items-center rounded-full bg-brand text-ink transition-transform duration-300 group-hover:rotate-45">
               <ArrowUpRight className="size-4" />
             </span>

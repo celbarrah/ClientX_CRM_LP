@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
-import { PARTNERS } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Accent, Button, Eyebrow, Reveal, SectionHeading, Sticker } from "@/components/ui";
 import { Header } from "@/components/Header";
 import { Faq } from "@/components/Faq";
@@ -8,15 +8,18 @@ import { Footer } from "@/components/Footer";
 import { PartnerForm } from "@/components/PartnerForm";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = {
-  title: "ClientX Partner Program — Recommandez ou revendez le CRM ClientX",
-  description: "Apporteur d'affaires (20 %) ou partenaire agence (30 %) : des commissions chaque mois, tant que vos clients restent abonnés.",
+export const partnersMetadata = (lang: Lang): Metadata => {
+  const t = copy(lang).UI.partnersPage;
+  return { title: t.title, description: t.description };
 };
 
-export default function Partenaires() {
+/** ClientX Partner Program, shared by /partenaires (French) and /en/partners (English). */
+export function PartnersPage({ lang }: { lang: Lang }) {
+  const { PARTNERS, UI } = copy(lang);
+  const t = UI.partnersPage;
   return (
     <>
-      <Header home={false} />
+      <Header home={false} lang={lang} />
       <main>
         <section id="top" className="relative isolate overflow-hidden pb-16 pt-32 sm:pb-24 sm:pt-40">
           <div className="absolute inset-0 -z-10 bg-paper [mask-image:radial-gradient(ellipse_75%_65%_at_50%_10%,black,transparent)]" />
@@ -30,7 +33,7 @@ export default function Partenaires() {
               <Button href="#candidature" size="lg">
                 {PARTNERS.cta}
               </Button>
-              <Sticker rotate={-4}>Jusqu&apos;à 30 % chaque mois</Sticker>
+              <Sticker rotate={-4}>{t.sticker}</Sticker>
             </div>
           </div>
         </section>
@@ -75,7 +78,7 @@ export default function Partenaires() {
         {/* Benefits */}
         <section className="py-20 sm:py-28">
           <div className="container-x">
-            <SectionHeading eyebrow="Avantages" title="Pourquoi devenir" accent="partenaire ?" />
+            <SectionHeading eyebrow={t.benefits.eyebrow} title={t.benefits.title} accent={t.benefits.accent} />
             <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {PARTNERS.benefits.map((b) => (
                 <Reveal key={b.title} className="rounded-[1.75rem] border border-line bg-surface p-7">
@@ -93,7 +96,7 @@ export default function Partenaires() {
         {/* Steps */}
         <section className="py-20 sm:py-28">
           <div className="container-x">
-            <SectionHeading eyebrow="Comment ça marche" title="4 étapes pour" accent="commencer" />
+            <SectionHeading eyebrow={t.steps.eyebrow} title={t.steps.title} accent={t.steps.accent} />
             <ol className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {PARTNERS.steps.map((s, i) => (
                 <li key={s.title} className="rounded-[1.75rem] border border-line bg-surface p-7">
@@ -110,20 +113,18 @@ export default function Partenaires() {
         <section id="candidature" className="scroll-mt-24 py-20 sm:py-28">
           <div className="container-x grid items-center gap-12 lg:grid-cols-12">
             <div className="lg:col-span-5">
-              <SectionHeading align="left" eyebrow="Candidature" title="Devenez partenaire" accent="ClientX" />
-              <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
-                Choisissez votre formule et laissez-nous vos coordonnées : nous vous envoyons votre lien et votre kit marketing.
-              </p>
+              <SectionHeading align="left" eyebrow={t.apply.eyebrow} title={t.apply.title} accent={t.apply.accent} />
+              <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">{t.applyText}</p>
             </div>
             <div className="lg:col-span-7">
-              <PartnerForm />
+              <PartnerForm lang={lang} />
             </div>
           </div>
         </section>
 
-        <Faq items={PARTNERS.faq} />
+        <Faq items={PARTNERS.faq} lang={lang} />
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </>
   );
 }

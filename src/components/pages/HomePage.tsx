@@ -1,3 +1,4 @@
+import type { Lang } from "@/lib/i18n";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { Manifesto } from "@/components/Manifesto";
@@ -10,22 +11,23 @@ import { Faq } from "@/components/Faq";
 import { Footer } from "@/components/Footer";
 import { MobileCta } from "@/components/MobileCta";
 
-export default function Home() {
+/** Home page, shared by / (French) and /en (English). */
+export function HomePage({ lang }: { lang: Lang }) {
   return (
     <>
-      <Header />
+      <Header lang={lang} />
       <main>
-        <Hero />
-        <Manifesto />
-        <ModulesTabs />
-        <Archive />
-        <Proof />
-        <ToolsVsPlatform />
-        <Pricing />
-        <Faq />
+        <Hero lang={lang} />
+        <Manifesto lang={lang} />
+        <ModulesTabs lang={lang} />
+        <Archive lang={lang} />
+        <Proof lang={lang} />
+        <ToolsVsPlatform lang={lang} />
+        <Pricing lang={lang} />
+        <Faq lang={lang} />
       </main>
-      <Footer cta />
-      <MobileCta />
+      <Footer cta lang={lang} />
+      <MobileCta lang={lang} />
     </>
   );
 }

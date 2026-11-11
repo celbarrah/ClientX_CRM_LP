@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 const HALF = Math.ceil(CLIENTS.length / 2);
 const ROWS = [CLIENTS.slice(0, HALF), CLIENTS.slice(HALF)];
 
-export function LogoMarquee() {
+export function LogoMarquee({ label }: { label: string }) {
   return (
-    <div aria-label="Ils nous font confiance" className="border-y border-line py-10">
+    <div aria-label={label} className="border-y border-line py-10">
       <div className="grid gap-6 sm:gap-8">
         {ROWS.map((row, r) => (
           <div key={r} className="mask-fade-x group flex overflow-hidden">

@@ -5,6 +5,16 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { detectCountry, knownCountry } from "@/lib/geo";
 import { PHONE_COUNTRIES, OTHER, findCountry, normalizePhone } from "@/lib/phone";
+import type { Copy } from "@/lib/i18n";
+
+type FormText = Copy["UI"]["form"];
+
+/** Help text under the phone field, e.g. "9 chiffres après +212". */
+export function phoneHint(code: string, t: FormText) {
+  const c = findCountry(code);
+  if (!c) return t.phoneFull;
+  return t.phoneDigits(c.min === c.max ? `${c.min}` : t.range(c.min, c.max), c.dial);
+}
 
 // Form building blocks shared by the demo form and the partner application form.
 
@@ -108,7 +118,11 @@ export function PhoneInput({
   onCountry,
   onInput,
   onBlur,
+  t,
+  names,
 }: {
+  t: FormText;
+  names: Record<string, string>;
   country: string | null; // null while the visitor's country is still being detected
   digits: string;
   invalid: boolean;
@@ -131,25 +145,25 @@ export function PhoneInput({
         </span>
         <ChevronDown aria-hidden className="size-3.5 text-muted" />
         <select
-          aria-label="Pays de l'indicatif"
+          aria-label={t.phoneCountry}
           value={c ? c.code : OTHER}
           onChange={(e) => onCountry(e.target.value)}
           className="absolute inset-0 cursor-pointer opacity-0"
         >
           {PHONE_COUNTRIES.map((p) => (
             <option key={p.code} value={p.code}>
-              {p.name} (+{p.dial})
+              {names[p.code] ?? p.name} (+{p.dial})
             </option>
           ))}
-          <option value={OTHER}>Autre pays (indicatif complet)</option>
+          <option value={OTHER}>{t.otherCountry}</option>
         </select>
       </div>
       <input
         type="tel"
         inputMode="numeric"
         autoComplete="tel-national"
-        aria-label="Numéro de téléphone"
-        placeholder={c ? c.example : country ? "Indicatif + numéro" : ""}
+        aria-label={t.phoneNumber}
+        placeholder={c ? c.example : country ? t.phonePlaceholder : ""}
         value={digits}
         maxLength={16}
         onChange={(e) => onInput(e.target.value, false)}

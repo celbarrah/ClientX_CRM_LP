@@ -1,11 +1,13 @@
 import { Check, ShieldCheck } from "lucide-react";
-import { HERO, CTA } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Accent, Button, Eyebrow, Highlight, Sticker, Target } from "@/components/ui";
 import { DemoForm } from "@/components/DemoForm";
 import { LogoMarquee } from "@/components/LogoMarquee";
 
 /* Painted in its final state on the first frame: no entrance fades, no scroll parallax. */
-export function Hero() {
+export function Hero({ lang = "fr" }: { lang?: Lang }) {
+  const { HERO, CTA, UI } = copy(lang);
+  const t = UI.hero;
   return (
     <section id="top" className="relative isolate overflow-hidden pt-32 sm:pt-40">
       <div className="absolute inset-0 -z-10 bg-paper [mask-image:radial-gradient(ellipse_75%_65%_at_50%_10%,black,transparent)]" />
@@ -22,15 +24,15 @@ export function Hero() {
 
           <h1 className="relative mt-8 text-[2.9rem] font-semibold leading-[1.02] tracking-[-0.05em] sm:text-7xl lg:text-[5.2rem]">
             <span className="block">
-              Réservez votre
+              {t.line1}
             </span>
             <span className="block">
-              <Highlight>démo</Highlight> <Accent>gratuite</Accent>
+              <Highlight>{t.highlight}</Highlight> <Accent>{t.accent}</Accent>
             </span>
             <span className="flex items-center gap-4">
-              aujourd&apos;hui.
+              {t.line3}
               <Sticker rotate={-8} className="hidden sm:inline-flex">
-                Audit offert
+                {t.sticker}
               </Sticker>
             </span>
             <span className="absolute -top-2 right-[8%] hidden lg:block">
@@ -39,7 +41,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-muted sm:mt-8">
-            <span className="font-medium text-ink">& recevez un audit offert de vos outils.</span>{" "}
+            <span className="font-medium text-ink">{t.lead}</span>{" "}
             <span className="hidden sm:inline">{HERO.subtitle}</span>
           </p>
 
@@ -61,19 +63,19 @@ export function Hero() {
             <div className="flex items-center gap-2.5 text-sm text-muted">
               <ShieldCheck className="size-5 text-brand-deep" />
               <span>
-                Certifié <span className="font-medium text-ink">ISO 9001</span>
+                {t.certified} <span className="font-medium text-ink">ISO 9001</span>
               </span>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-5">
-          <DemoForm />
+          <DemoForm lang={lang} />
         </div>
       </div>
 
       <div className="mt-16 sm:mt-24">
-        <LogoMarquee />
+        <LogoMarquee label={UI.logos} />
       </div>
     </section>
   );

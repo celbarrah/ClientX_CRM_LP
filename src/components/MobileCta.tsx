@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CTA } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui";
 import { CHAT_ENABLED } from "@/components/ChatWidget";
 import { cn } from "@/lib/utils";
 
 /** Sticky bottom CTA on mobile, shown once the hero form has scrolled out of view. */
-export function MobileCta() {
+export function MobileCta({ lang = "fr" }: { lang?: Lang }) {
+  const { CTA } = copy(lang);
   const [show, setShow] = useState(false);
 
   useEffect(() => {

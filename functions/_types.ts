@@ -2,6 +2,8 @@
 export type PagesContext = {
   request: Request & { cf?: { country?: string } };
   env: Record<string, string | undefined>;
+  /** Serves the static page (or the next function). */
+  next: () => Promise<Response>;
 };
 
 /** Country Cloudflare computed from the visitor's IP. It can't be set by the visitor (unlike request headers). */

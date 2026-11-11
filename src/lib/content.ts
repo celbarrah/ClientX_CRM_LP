@@ -297,7 +297,7 @@ export const TRUST = [
 
 // Visitors in Morocco see DH (HT) by default plus a switch; everyone else sees euros.
 // France buys online (payment links, the account is created after payment); Morocco books a demo (Payzone invoice after it).
-export const CURRENCIES = { eur: { label: "France (€)", symbol: "€" }, mad: { label: "Maroc (MAD)", symbol: "DH HT" } } as const;
+export const CURRENCIES = { eur: { label: "France (€)", symbol: "€ HT" }, mad: { label: "Maroc (MAD)", symbol: "DH HT" } } as const;
 export type Currency = keyof typeof CURRENCIES;
 
 export const BILLING = { monthly: { label: "Mensuel", unit: "mois" }, yearly: { label: "Annuel · 2 mois offerts", unit: "an" } } as const;
@@ -389,7 +389,7 @@ export const FAQ = [
   },
   {
     q: "Puis-je essayer avant de m'engager ?",
-    a: "Oui : si vous n'avez obtenu aucun rendez-vous dans les 30 premiers jours, nous vous remboursons la mise en place.",
+    a: "Oui : vous avez une garantie de 30 jours. Si vous n'êtes pas satisfait, nous vous remboursons votre abonnement, moins la valeur de la mise en place.",
   },
 ];
 
@@ -593,3 +593,232 @@ export const USE_CASES: {
     ],
   },
 ];
+
+/* ---------- Interface text used inside the components (kept here so the English version mirrors it). ---------- */
+
+export const UI = {
+  meta: {
+    title: "ClientX AI — Réservez votre démo du CRM IA tout-en-un",
+    description:
+      "Sites, funnels, CRM, e-mails, SMS, WhatsApp, agendas, paiements, formations et agents IA dans une seule plateforme. Démo live + audit gratuit de vos outils.",
+    ogTitle: "ClientX AI — Le CRM IA tout-en-un",
+    ogDescription: "Remplacez +20 outils et économisez plus de 15 000 € par an. Réservez votre démo gratuite.",
+    locale: "fr_FR",
+  },
+  home: "ClientX AI — accueil",
+  langSwitch: "Langue",
+  hero: {
+    line1: "Réservez votre",
+    highlight: "démo",
+    accent: "gratuite",
+    line3: "aujourd'hui.",
+    sticker: "Audit offert",
+    lead: "& recevez un audit offert de vos outils.",
+    certified: "Certifié",
+  },
+  logos: "Ils nous font confiance",
+  manifesto: {
+    intro: "Qui sommes-nous :",
+    a: "Nous réunissons",
+    stickerTools: "+20 outils en 1",
+    highlight: "vos outils",
+    b: "dans une seule plateforme.",
+    c: "De la",
+    capture: "capture",
+    stickerCosts: "0 € de coûts cachés",
+    d: "à la",
+    accent: "signature.",
+    video: "La plateforme en action",
+  },
+  video: { play: "Lire la démo vidéo", watch: "Voir la démo" },
+  modules: { eyebrow: "Capturer → Nourrir → Conclure", title: "Une plateforme,", accent: "six super-pouvoirs" },
+  mocks: {
+    capture: {
+      window: "votre-entreprise.com/offre",
+      steps: ["Page de capture", "Formulaire", "Merci"],
+      step: "Étape",
+      sent: "Formulaire envoyé",
+      added: "Nouveau prospect ajouté au CRM",
+    },
+    nurture: {
+      window: "Campagne — Nurturing nouveaux prospects",
+      steps: [
+        { ch: "E-mail", t: "Bienvenue chez nous", d: "Jour 0", rate: "Envoyé" },
+        { ch: "SMS", t: "Votre guide est prêt", d: "Jour 1", rate: "Délivré" },
+        { ch: "WhatsApp", t: "Une question ? Répondez ici", d: "Jour 3", rate: "Répondu" },
+        { ch: "Réseaux sociaux", t: "Publication programmée", d: "Jour 5", rate: "Planifiée" },
+      ],
+      reply: "« Oui, je suis intéressée ! »",
+    },
+    booking: {
+      window: "Agenda — Démos & rendez-vous",
+      days: ["Lun", "Mar", "Mer", "Jeu", "Ven"],
+      byAi: "Réservé par IA",
+      demo: "Démo",
+      botA: "« Je vous propose ",
+      botTime: "mardi à 13h",
+      botB: " pour votre démo. Je vous envoie la confirmation ? »",
+      reminder: "Rappel SMS envoyé — J-1",
+      confirmed: "Présence confirmée",
+    },
+    courses: {
+      window: "Espace membres — Académie",
+      modules: ["Module 1 — Les fondamentaux", "Module 2 — Passer à l'action", "Module 3 — Stratégies avancées"],
+      enrolled: "Nouvel apprenant inscrit",
+    },
+    close: {
+      window: "Pipeline de ventes — T4",
+      cols: ["Nouveau", "Démo", "Gagné"],
+      signed: "Devis signé électroniquement",
+      paid: "Paiement reçu · Stripe",
+    },
+    automate: {
+      window: "Workflow — Qualification automatique",
+      nodes: [
+        { t: "Déclencheur", d: "Formulaire soumis" },
+        { t: "Agent IA", d: "Qualifie le prospect" },
+        { t: "WhatsApp", d: "Message personnalisé" },
+        { t: "CRM", d: "Opportunité créée" },
+      ],
+      active: "Agent IA actif 24h/24",
+    },
+  },
+  archive: {
+    eyebrow: "Archives · Cas d'usage",
+    title: "Ouvrez le dossier de",
+    accent: "votre secteur",
+    subtitle: "Des workflows concrets, déjà éprouvés. Cliquez sur un dossier pour l'ouvrir.",
+    count: (sectors: number, cases: number) => `${sectors} secteurs · ${cases} cas d'usage`,
+    open: (sector: string) => `Ouvrir le dossier ${sector}`,
+    case: "Cas",
+    cases: (n: number) => `${n} cas d'usage`,
+    dialog: (sector: string) => `Cas d'usage — ${sector}`,
+    folder: "Dossier",
+    close: "Fermer",
+    prev: "Dossier précédent",
+    next: "Dossier suivant",
+    cta: (primary: string) => `${primary} pour ce secteur`,
+  },
+  proof: {
+    eyebrow: "Ils en parlent mieux que nous",
+    prev: "Témoignage précédent",
+    next: "Témoignage suivant",
+    item: (k: number) => `Témoignage ${k}`,
+    supportA: "Et vous n'êtes jamais seul : ",
+    supportAccent: "mise en route guidée",
+    supportB: " par e-mail et vidéos + 1 appel de 30 min, et migration simplifiée par nos eXperts.",
+  },
+  tools: {
+    eyebrow: "+20 outils vs 1 plateforme",
+    title: "Arrêtez de payer pour",
+    accent: "20 outils",
+    subtitle: "Chaque abonnement en moins, c'est une connexion, une facture et une source d'erreurs en moins.",
+    today: "Aujourd'hui",
+    subscriptions: "+20 abonnements",
+    stack: "Votre stack actuelle",
+    with: "Avec ClientX AI",
+    platform: "Une seule plateforme, pilotée par l'IA.",
+    points: ["1 abonnement, 1 connexion", "1 base de données client unifiée", "1 équipe support", "Données chiffrées, conformes RGPD"],
+    savings: "Économies estimées",
+    amount: "15 000 €",
+    perYear: "/ an",
+  },
+  pricing: {
+    eyebrow: "Tarifs",
+    title: "Combien coûte",
+    accent: "ClientX AI ?",
+    subtitle: "Au mois sans engagement, ou à l'année avec 2 mois offerts.",
+    billing: "Période de facturation",
+    currency: "Devise",
+    popular: "Le plus populaire",
+    monthlyTerms: (setup: string) => `+ ${setup} de mise en place, une seule fois · Sans engagement`,
+    yearlyTerms: (setup: string) => `2 mois offerts · + ${setup} de mise en place`,
+    choose: (name: string) => `Choisir ${name}`,
+    vat: "Prix HT, TVA 20 % en sus.",
+  },
+  faq: { eyebrow: "FAQ", title: "Vos questions,", accent: "nos réponses", other: "Une autre question ?" },
+  footer: {
+    eyebrow: "Démo live + audit gratuit",
+    title: "Prêt à tout réunir dans",
+    accent: "une seule plateforme ?",
+    text: "Un eXpert vous montre ClientX AI sur votre propre activité, et identifie ce que vous pouvez économiser.",
+    sticker: "Réponse sous 24h",
+    small: "Démo gratuite · Sans engagement",
+    tagline: "Le CRM IA tout-en-un qui remplace plus de 20 outils. Certifié ISO 9001.",
+    nav: "Navigation",
+    contact: "Contact",
+    rights: "Tous droits réservés.",
+    legal: "Mentions légales",
+    privacy: "Politique de confidentialité",
+  },
+  form: {
+    step: (n: number) => `Étape ${n} sur 2`,
+    contactTitle: "Vos coordonnées",
+    companyTitle: "Votre entreprise",
+    firstName: "Prénom",
+    lastName: "Nom",
+    workEmail: "E-mail professionnel",
+    email: "E-mail",
+    phone: "Téléphone",
+    emailPlaceholder: "sarah@entreprise.com",
+    next: "Continuer",
+    company: "Entreprise",
+    companyPlaceholder: "Nom de votre entreprise",
+    sector: "Secteur d'activité",
+    sectorPlaceholder: "Sélectionnez votre secteur",
+    teamSize: "Taille de l'équipe",
+    back: "Retour",
+    sending: "Envoi…",
+    redirecting: "Redirection…",
+    error: "L'envoi a échoué. Réessayez, ou écrivez-nous à contact@clientx.ai.",
+    privacy: "Vos données sont chiffrées et ne sont jamais revendues. En continuant, vous acceptez notre",
+    privacyPartner: "Vos données sont chiffrées et ne sont jamais revendues. En envoyant ce formulaire, vous acceptez notre",
+    privacyLink: "politique de confidentialité",
+    phoneCountry: "Pays de l'indicatif",
+    otherCountry: "Autre pays (indicatif complet)",
+    phoneNumber: "Numéro de téléphone",
+    phonePlaceholder: "Indicatif + numéro",
+    phoneFull: "Numéro complet avec l'indicatif du pays",
+    phoneDigits: (n: string, dial: string) => `${n} chiffres après +${dial}`,
+    range: (min: number, max: number) => `${min} à ${max}`,
+  },
+  partnerForm: {
+    plan: "Formule",
+    emailPlaceholder: "sarah@agence.com",
+    company: "Société (facultatif)",
+    companyPlaceholder: "Votre agence ou activité",
+    link: "Site ou réseau social (facultatif)",
+    message: "Votre audience ou vos clients (facultatif)",
+    messagePlaceholder: "Qui comptez-vous recommander ou équiper ?",
+  },
+  partnersPage: {
+    title: "ClientX Partner Program — Recommandez ou revendez le CRM ClientX",
+    description:
+      "Apporteur d'affaires (20 %) ou partenaire agence (30 %) : des commissions chaque mois, tant que vos clients restent abonnés.",
+    sticker: "Jusqu'à 30 % chaque mois",
+    benefits: { eyebrow: "Avantages", title: "Pourquoi devenir", accent: "partenaire ?" },
+    steps: { eyebrow: "Comment ça marche", title: "4 étapes pour", accent: "commencer" },
+    apply: { eyebrow: "Candidature", title: "Devenez partenaire", accent: "ClientX" },
+    applyText:
+      "Choisissez votre formule et laissez-nous vos coordonnées : nous vous envoyons votre lien et votre kit marketing.",
+  },
+  thankYou: {
+    title: "Merci — Votre demande de démo ClientX AI est envoyée",
+    titleMA: "Merci — Votre demande de démo ClientX AI (Maroc) est envoyée",
+    thanks: "Merci",
+    received: " ! Votre demande est ",
+    accent: "bien reçue",
+    next: "Voici les prochaines étapes.",
+    back: "Retour au site",
+    question: "Une question ?",
+  },
+  legal: { title: "Mentions légales — ClientX AI", privacyTitle: "Politique de confidentialité — ClientX AI" },
+};
+
+/** Labels for values sent to the CRM as they are (French in both versions). Empty: the value is its own label. */
+export const SECTOR_LABELS: Record<string, string> = {};
+export const PARTNER_PLAN_LABELS: Record<string, string> = {};
+/** Phone country names by ISO code. Empty: the French names from lib/phone.ts. */
+export const PHONE_NAMES: Record<string, string> = {};
+/** Form error messages (lib/schema.ts writes them in French). Empty: shown as they are. */
+export const ERRORS: Record<string, string> = {};

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Check, Minus, Sparkles, Wallet } from "lucide-react";
-import { PRICING, CTA, CURRENCIES, BILLING, type Billing, type Currency } from "@/lib/content";
+import type { Billing, Currency } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { detectCountry } from "@/lib/geo";
 import { Button, Reveal, SectionHeading } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,9 @@ function Switch<T extends string>({ label, value, options, onChange }: { label: 
   );
 }
 
-export function Pricing() {
+export function Pricing({ lang = "fr" }: { lang?: Lang }) {
+  const { PRICING, CTA, CURRENCIES, BILLING, UI } = copy(lang);
+  const t = UI.pricing;
   // Everyone sees euros. Visitors in Morocco get DH by default plus a switch.
   const [inMorocco, setInMorocco] = useState(false);
   const [currency, setCurrency] = useState<Currency>("eur");
@@ -47,24 +50,22 @@ export function Pricing() {
   const setup = `${PRICING.setup[currency]} ${symbol}`;
   const terms =
     billing === "monthly"
-      ? `+ ${setup} de mise en place, une seule fois · Sans engagement`
-      : buysOnline
-        ? "Mise en place offerte · 2 mois offerts"
-        : "2 mois offerts"; // MA yearly: setup fee not shown until Joris confirms
+      ? t.monthlyTerms(setup)
+      : t.yearlyTerms(setup); // the setup fee is charged on yearly plans too (France and Morocco)
 
   return (
     <section id="tarifs" className="scroll-mt-24 py-20 sm:py-28">
       <div className="container-x">
         <SectionHeading
-          eyebrow="Tarifs"
-          title="Combien coûte"
-          accent="ClientX AI ?"
-          subtitle="Au mois sans engagement, ou à l'année avec 2 mois et la mise en place offerts."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          accent={t.accent}
+          subtitle={t.subtitle}
         />
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Switch label="Période de facturation" value={billing} options={BILLING} onChange={setBilling} />
-          {inMorocco && <Switch label="Devise" value={currency} options={CURRENCIES} onChange={setCurrency} />}
+          <Switch label={t.billing} value={billing} options={BILLING} onChange={setBilling} />
+          {inMorocco && <Switch label={t.currency} value={currency} options={CURRENCIES} onChange={setCurrency} />}
         </div>
 
         <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-3">
@@ -85,7 +86,7 @@ export function Pricing() {
                   <h3 className="font-mono text-[12px] uppercase tracking-[0.16em]">{p.name}</h3>
                   {p.popular && (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-[12px] font-semibold text-ink">
-                      <Sparkles className="size-3.5" /> Le plus populaire
+                      <Sparkles className="size-3.5" /> {t.popular}
                     </span>
                   )}
                 </div>
@@ -120,7 +121,7 @@ export function Pricing() {
                 </ul>
                 <div className="mt-auto pt-10">
                   <Button href={buysOnline ? p.paymentLinks[billing] : "#demo"} variant={p.popular ? "brand" : "dark"} className="w-full justify-between">
-                    {buysOnline ? `Choisir ${p.name}` : CTA.primary}
+                    {buysOnline ? t.choose(p.name) : CTA.primary}
                   </Button>
                 </div>
               </div>
@@ -134,7 +135,7 @@ export function Pricing() {
           </span>
           <p className="text-[14px] leading-relaxed text-ink-soft">
             <span className="font-medium text-ink">{PRICING.credits.offer}</span> {PRICING.credits.text}
-            {!buysOnline && <span className="mt-1 block font-medium text-ink">Prix HT, TVA 20 % en sus.</span>}
+            {!buysOnline && <span className="mt-1 block font-medium text-ink">{t.vat}</span>}
           </p>
         </Reveal>
       </div>

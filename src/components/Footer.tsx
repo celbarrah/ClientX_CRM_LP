@@ -1,10 +1,14 @@
 import { Mail, Phone } from "lucide-react";
-import { CONTACT, NAV, CTA } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
+import { pathIn } from "@/lib/lang";
 import { Accent, Button, Eyebrow, Logo, Reveal, Sticker } from "@/components/ui";
+import { LangSwitch } from "@/components/LangSwitch";
 import { navHref } from "@/lib/utils";
 
 /** Dark closing block: final CTA and footer live in the same surface. */
-export function Footer({ cta = false }: { cta?: boolean }) {
+export function Footer({ cta = false, lang = "fr" }: { cta?: boolean; lang?: Lang }) {
+  const { CONTACT, NAV, CTA, UI } = copy(lang);
+  const t = UI.footer;
   return (
     <footer className="px-3 pb-3 sm:px-4 sm:pb-4">
       <div className="grain relative isolate mx-auto max-w-[1600px] overflow-hidden rounded-[2.5rem] bg-ink text-white">
@@ -13,22 +17,18 @@ export function Footer({ cta = false }: { cta?: boolean }) {
 
         {cta && (
           <Reveal className="container-x flex flex-col items-center pb-20 pt-24 text-center sm:pb-28 sm:pt-32">
-            <Eyebrow dark>Démo live + audit gratuit</Eyebrow>
+            <Eyebrow dark>{t.eyebrow}</Eyebrow>
             <h2 className="mt-7 max-w-4xl text-balance text-[2.5rem] font-semibold leading-[1] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
-              Prêt à tout réunir dans <Accent dark>une seule plateforme ?</Accent>
+              {t.title} <Accent dark>{t.accent}</Accent>
             </h2>
-            <p className="mt-6 max-w-xl text-lg text-white/60">
-              Un eXpert vous montre ClientX AI sur votre propre activité, et identifie ce que vous pouvez économiser.
-            </p>
+            <p className="mt-6 max-w-xl text-lg text-white/60">{t.text}</p>
             <div className="relative mt-10">
               <Button href="#demo" variant="brand" size="lg">{CTA.primary}</Button>
               <span className="absolute -right-24 -top-8 hidden sm:block">
-                <Sticker rotate={8} className="bg-canvas">Réponse sous 24h</Sticker>
+                <Sticker rotate={8} className="bg-canvas">{t.sticker}</Sticker>
               </span>
             </div>
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">
-              Démo gratuite · Sans engagement
-            </p>
+            <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">{t.small}</p>
           </Reveal>
         )}
 
@@ -36,22 +36,20 @@ export function Footer({ cta = false }: { cta?: boolean }) {
           <div className="container-x grid gap-12 py-14 md:grid-cols-12">
             <div className="md:col-span-5">
               <Logo dark className="h-8" />
-              <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/55">
-                Le CRM IA tout-en-un qui remplace plus de 20 outils. Certifié ISO 9001.
-              </p>
+              <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/55">{t.tagline}</p>
             </div>
             <div className="md:col-span-3">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/40">Navigation</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/40">{t.nav}</p>
               <ul className="mt-5 grid gap-3 text-[15px]">
                 {NAV.map((n) => (
                   <li key={n.href}>
-                    <a href={navHref(n.href, cta)} className="text-white/70 transition-colors hover:text-brand">{n.label}</a>
+                    <a href={navHref(n.href, cta, lang)} className="text-white/70 transition-colors hover:text-brand">{n.label}</a>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="md:col-span-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/40">Contact</p>
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/40">{t.contact}</p>
               <ul className="mt-5 grid gap-3 text-[15px]">
                 <li>
                   <a href={`mailto:${CONTACT.email}`} className="inline-flex items-center gap-2.5 text-white/70 hover:text-brand">
@@ -68,10 +66,11 @@ export function Footer({ cta = false }: { cta?: boolean }) {
           </div>
           <div className="border-t border-white/10">
             <div className="container-x flex flex-col gap-3 py-6 text-[13px] text-white/45 md:flex-row md:items-center md:justify-between">
-              <p>© {new Date().getFullYear()} {CONTACT.entities}. Tous droits réservés.</p>
-              <div className="flex gap-6">
-                <a href="/mentions-legales" className="hover:text-white">Mentions légales</a>
-                <a href="/politique-de-confidentialite" className="hover:text-white">Politique de confidentialité</a>
+              <p>© {new Date().getFullYear()} {CONTACT.entities}. {t.rights}</p>
+              <div className="flex flex-wrap items-center gap-6">
+                <a href={pathIn("/mentions-legales", lang)} className="hover:text-white">{t.legal}</a>
+                <a href={pathIn("/politique-de-confidentialite", lang)} className="hover:text-white">{t.privacy}</a>
+                <LangSwitch lang={lang} label={UI.langSwitch} dark />
               </div>
             </div>
           </div>

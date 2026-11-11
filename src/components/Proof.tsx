@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { TESTIMONIALS, TRUST, SUPPORT, USE_CASES } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { SECTOR_ICONS } from "@/components/Archive";
 import { Accent, Eyebrow, Reveal, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
 /** Testimonials + trust + support in one section. */
-export function Proof() {
+export function Proof({ lang = "fr" }: { lang?: Lang }) {
+  const { TESTIMONIALS, TRUST, SUPPORT, USE_CASES, UI } = copy(lang);
+  const p = UI.proof;
   const [i, setI] = useState(0);
   const t = TESTIMONIALS[i];
   const Icon = SECTOR_ICONS[t.sector];
@@ -25,7 +27,7 @@ export function Proof() {
       <div className="absolute inset-0 -z-10 bg-paper [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,black,transparent)]" />
       <div className="container-x">
         <Reveal className="flex flex-col items-center text-center">
-          <Eyebrow>Ils en parlent mieux que nous</Eyebrow>
+          <Eyebrow>{p.eyebrow}</Eyebrow>
         </Reveal>
 
         <div className="relative mx-auto mt-24 max-w-4xl text-center sm:mt-28">
@@ -48,7 +50,7 @@ export function Proof() {
           </div>
 
           <div className="mt-10 flex items-center justify-center gap-4">
-            <button onClick={() => go(-1)} aria-label="Témoignage précédent" className="grid size-11 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
+            <button onClick={() => go(-1)} aria-label={p.prev} className="grid size-11 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
               <ArrowLeft className="size-4" />
             </button>
             <div className="flex gap-1.5">
@@ -56,12 +58,12 @@ export function Proof() {
                 <button
                   key={k}
                   onClick={() => setI(k)}
-                  aria-label={`Témoignage ${k + 1}`}
+                  aria-label={p.item(k + 1)}
                   className={cn("h-1.5 rounded-full", k === i ? "w-8 bg-brand" : "w-3 bg-ink/15")}
                 />
               ))}
             </div>
-            <button onClick={() => go(1)} aria-label="Témoignage suivant" className="grid size-11 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
+            <button onClick={() => go(1)} aria-label={p.next} className="grid size-11 place-items-center rounded-full border border-line-strong transition-colors hover:bg-ink hover:text-white">
               <ArrowRight className="size-4" />
             </button>
           </div>
@@ -86,8 +88,9 @@ export function Proof() {
         {/* Support, written as an editorial line instead of three cards */}
         <Reveal className="mx-auto mt-16 max-w-4xl text-center">
           <p className="text-balance text-2xl font-medium leading-snug tracking-[-0.02em] sm:text-4xl">
-            Et vous n&apos;êtes jamais seul : <Accent>mise en route guidée</Accent> par e-mail et vidéos + 1 appel de 30 min,
-            et migration simplifiée par nos eXperts.
+            {p.supportA}
+            <Accent>{p.supportAccent}</Accent>
+            {p.supportB}
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {SUPPORT.items.map((s, k) => (

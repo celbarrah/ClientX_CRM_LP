@@ -1,19 +1,21 @@
 import { Check } from "lucide-react";
-import { THANK_YOU } from "@/lib/content";
+import { copy, homeOf, type Lang } from "@/lib/i18n";
 import type { Market } from "@/lib/market";
 import { Accent, Button, Eyebrow, Logo } from "@/components/ui";
-import { LeadConfirmed } from "@/app/merci/LeadConfirmed";
+import { LeadConfirmed } from "@/components/LeadConfirmed";
 
-/** Shared layout of the two thank-you pages (/merci and /merci-maroc). */
-export function ThankYou({ market }: { market: Market }) {
+/** Shared layout of the thank-you pages (/merci, /merci-maroc and their English versions). */
+export function ThankYou({ market, lang = "fr" }: { market: Market; lang?: Lang }) {
+  const { THANK_YOU, UI } = copy(lang);
   const t = THANK_YOU[market];
+  const w = UI.thankYou;
   return (
     <main className="relative isolate min-h-dvh overflow-hidden pb-24">
       <div className="absolute inset-0 -z-10 bg-grid [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
       <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[560px] w-[1000px] max-w-[160vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(50_220_50/0.3),transparent)]" />
 
       <div className="container-x flex justify-center pt-10">
-        <a href="/" aria-label="ClientX AI — accueil">
+        <a href={homeOf(lang)} aria-label={UI.home}>
           <Logo className="h-7" />
         </a>
       </div>
@@ -24,9 +26,12 @@ export function ThankYou({ market }: { market: Market }) {
         </span>
         <Eyebrow className="mt-8">{t.eyebrow}</Eyebrow>
         <h1 className="mt-6 max-w-3xl text-balance text-[2.6rem] font-semibold leading-[1] tracking-[-0.045em] sm:text-6xl">
-          Merci<LeadConfirmed market={market} /> ! Votre demande est <Accent>bien reçue</Accent>
+          {w.thanks}
+          <LeadConfirmed market={market} />
+          {w.received}
+          <Accent>{w.accent}</Accent>
         </h1>
-        <p className="mx-auto mt-6 max-w-lg text-lg text-muted">Voici les prochaines étapes.</p>
+        <p className="mx-auto mt-6 max-w-lg text-lg text-muted">{w.next}</p>
 
         <div className="mt-14 grid w-full max-w-4xl gap-4 text-left md:grid-cols-3">
           {t.steps.map((s, i) => (
@@ -39,9 +44,9 @@ export function ThankYou({ market }: { market: Market }) {
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-4">
-          <Button href="/" variant="ghost">Retour au site</Button>
+          <Button href={homeOf(lang)} variant="ghost">{w.back}</Button>
           <p className="text-sm text-muted">
-            Une question ? {t.email} · {t.phone}
+            {w.question} {t.email} · {t.phone}
           </p>
         </div>
       </div>

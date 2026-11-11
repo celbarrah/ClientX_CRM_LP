@@ -5,15 +5,19 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { PARTNER_PLANS, partnerSchema, type PartnerPayload } from "@/lib/schema";
-import { PARTNERS } from "@/lib/content";
-import { phoneHint } from "@/lib/phone";
+import { copy, type Lang } from "@/lib/i18n";
+import { pathIn } from "@/lib/lang";
 import { getAttribution } from "@/lib/attribution";
 import { detectCountry } from "@/lib/geo";
 import { cn } from "@/lib/utils";
-import { Field, PhoneInput, inputCls, submitCls, usePhone } from "@/components/form";
+import { Field, PhoneInput, inputCls, phoneHint, submitCls, usePhone } from "@/components/form";
 
 /** "Devenir partenaire": the application becomes a CRM contact tagged "ClientX Partner Program" (see lib/partner.ts). */
-export function PartnerForm() {
+export function PartnerForm({ lang = "fr" }: { lang?: Lang }) {
+  const { PARTNERS, UI, ERRORS, PHONE_NAMES, PARTNER_PLAN_LABELS } = copy(lang);
+  const f = UI.form;
+  const pf = UI.partnerForm;
+  const err = (m?: string) => (m ? (ERRORS[m] ?? m) : undefined);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const {
     register,
@@ -52,7 +56,7 @@ export function PartnerForm() {
             {/* Honeypot */}
             <input type="text" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden {...register("website")} />
 
-            <Field group label="Formule" error={errors.plan?.message}>
+            <Field group label={pf.plan} error={err(errors.plan?.message)}>
               <div role="radiogroup" className="grid gap-1.5 sm:grid-cols-2">
                 {PARTNER_PLANS.map((p) => (
                   <button
@@ -68,50 +72,50 @@ export function PartnerForm() {
                         : "border-line-strong bg-canvas text-ink-soft hover:border-ink/40",
                     )}
                   >
-                    {p}
+                    {PARTNER_PLAN_LABELS[p] ?? p}
                   </button>
                 ))}
               </div>
             </Field>
             <div className="grid gap-3.5 sm:grid-cols-2">
-              <Field label="Prénom" error={errors.firstName?.message}>
+              <Field label={f.firstName} error={err(errors.firstName?.message)}>
                 <input {...register("firstName")} autoComplete="given-name" placeholder="Sarah" className={inputCls(!!errors.firstName)} />
               </Field>
-              <Field label="Nom" error={errors.lastName?.message}>
+              <Field label={f.lastName} error={err(errors.lastName?.message)}>
                 <input {...register("lastName")} autoComplete="family-name" placeholder="Benali" className={inputCls(!!errors.lastName)} />
               </Field>
             </div>
-            <Field label="E-mail" error={errors.email?.message}>
-              <input {...register("email")} type="email" autoComplete="email" inputMode="email" placeholder="sarah@agence.com" className={inputCls(!!errors.email)} />
+            <Field label={f.email} error={err(errors.email?.message)}>
+              <input {...register("email")} type="email" autoComplete="email" inputMode="email" placeholder={pf.emailPlaceholder} className={inputCls(!!errors.email)} />
             </Field>
-            <Field group label="Téléphone" error={errors.phone?.message} hint={errors.phone ? phoneHint(phone.country) : undefined}>
-              <PhoneInput {...phone.inputProps} invalid={!!errors.phone} />
+            <Field group label={f.phone} error={err(errors.phone?.message)} hint={errors.phone ? phoneHint(phone.country, f) : undefined}>
+              <PhoneInput {...phone.inputProps} invalid={!!errors.phone} t={f} names={PHONE_NAMES} />
             </Field>
             <div className="grid gap-3.5 sm:grid-cols-2">
-              <Field label="Société (facultatif)">
-                <input {...register("company")} autoComplete="organization" placeholder="Votre agence ou activité" className={inputCls(false)} />
+              <Field label={pf.company}>
+                <input {...register("company")} autoComplete="organization" placeholder={pf.companyPlaceholder} className={inputCls(false)} />
               </Field>
-              <Field label="Site ou réseau social (facultatif)">
+              <Field label={pf.link}>
                 <input {...register("link")} inputMode="url" placeholder="https://" className={inputCls(false)} />
               </Field>
             </div>
-            <Field label="Votre audience ou vos clients (facultatif)">
+            <Field label={pf.message}>
               <textarea
                 {...register("message")}
                 rows={3}
-                placeholder="Qui comptez-vous recommander ou équiper ?"
+                placeholder={pf.messagePlaceholder}
                 className={cn(inputCls(false), "h-auto py-3")}
               />
             </Field>
             <button type="submit" disabled={status === "sending"} className={submitCls}>
-              {status === "sending" ? "Envoi…" : PARTNERS.cta}
+              {status === "sending" ? f.sending : PARTNERS.cta}
               <span className="grid size-9 place-items-center rounded-full bg-brand text-ink">
                 {status === "sending" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" strokeWidth={2.4} />}
               </span>
             </button>
             {status === "error" && (
               <p role="alert" className="text-[13px] text-red-500">
-                L&apos;envoi a échoué. Réessayez, ou écrivez-nous à contact@clientx.ai.
+                {f.error}
               </p>
             )}
           </form>
@@ -120,9 +124,9 @@ export function PartnerForm() {
         <p className="mt-5 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
           <Lock className="mt-0.5 size-3.5 shrink-0" />
           <span>
-            Vos données sont chiffrées et ne sont jamais revendues. En envoyant ce formulaire, vous acceptez notre{" "}
-            <a href="/politique-de-confidentialite" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
-              politique de confidentialité
+            {f.privacyPartner}{" "}
+            <a href={pathIn("/politique-de-confidentialite", lang)} className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+              {f.privacyLink}
             </a>
             .
           </span>

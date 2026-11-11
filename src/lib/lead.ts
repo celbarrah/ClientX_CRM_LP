@@ -4,7 +4,7 @@ import { payloadSchema, type LeadPayload } from "./schema";
 import { chatWebhook, ghlConfig, isCountry, marketOf, type Env, type Market } from "./market";
 
 const GHL_DEFAULT = "https://services.leadconnectorhq.com";
-const CRM_DEFAULT = "https://crm.clientx.ai";
+export const CRM_DEFAULT = "https://crm.clientx.ai";
 const SOURCE = "LP Démo ClientX AI";
 
 type Lead = Omit<LeadPayload, "website" | "country">;
@@ -214,7 +214,7 @@ async function sendToGhl(lead: Lead, { market, ghl: cfg, api }: Ctx): Promise<De
 
 /* ---------- Google Chat notification ---------- */
 
-const UTM_LABELS: [string, string][] = [
+export const UTM_LABELS: [string, string][] = [
   ["utm_source", "Source"],
   ["utm_medium", "Support"],
   ["utm_campaign", "Campagne"],
@@ -228,7 +228,7 @@ const UTM_LABELS: [string, string][] = [
 ];
 
 /** Visitor text can't inject Google Chat links (`<url|text>`); other characters are kept (emails, URLs). */
-const clean = (v?: string | null) => (v ?? "").replace(/[<>]/g, "").trim() || "—";
+export const clean = (v?: string | null) => (v ?? "").replace(/[<>]/g, "").trim() || "—";
 
 async function notifyChat(env: Env, lead: Lead, ctx: Ctx, contactId: string | null, via: Delivery["via"]) {
   const url = chatWebhook(env, ctx.market);
@@ -268,6 +268,11 @@ async function notifyChat(env: Env, lead: Lead, ctx: Ctx, contactId: string | nu
     `*Contact :* ${link}`,
   ];
 
+  await postChat(url, lines, "lead");
+}
+
+/** Posts a message to a Google Chat space (incoming webhook). Never throws: a failed notification is only logged. */
+export async function postChat(url: string, lines: string[], tag: string) {
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -275,8 +280,8 @@ async function notifyChat(env: Env, lead: Lead, ctx: Ctx, contactId: string | nu
       body: JSON.stringify({ text: lines.join("\n") }),
       signal: AbortSignal.timeout(5000),
     });
-    if (!res.ok) console.error(`[lead] Google Chat responded ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    if (!res.ok) console.error(`[${tag}] Google Chat responded ${res.status}: ${(await res.text()).slice(0, 200)}`);
   } catch (e) {
-    console.error("[lead] Google Chat notification failed:", e);
+    console.error(`[${tag}] Google Chat notification failed:`, e);
   }
 }
