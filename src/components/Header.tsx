@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { NAV, CTA } from "@/lib/content";
 import { Button, Logo } from "@/components/ui";
-import { cn } from "@/lib/utils";
+import { cn, navHref } from "@/lib/utils";
 
-export function Header() {
+/** `home`: rendered on the home page, where section links scroll instead of navigating. */
+export function Header({ home = true }: { home?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     // Passive listener; React skips the render when the boolean doesn't change.
@@ -23,21 +24,21 @@ export function Header() {
           scrolled ? "border-line bg-canvas/95 shadow-card" : "border-transparent",
         )}
       >
-        <a href="#top" aria-label="ClientX AI — accueil">
+        <a href={home ? "#top" : "/"} aria-label="ClientX AI — accueil">
           <Logo className="h-6 sm:h-7" />
         </a>
         <nav className="hidden items-center gap-1 md:flex">
           {NAV.map((n) => (
             <a
               key={n.href}
-              href={n.href}
+              href={navHref(n.href, home)}
               className="rounded-full px-4 py-2 text-sm text-ink-soft transition-colors hover:bg-ink/5 hover:text-ink"
             >
               {n.label}
             </a>
           ))}
         </nav>
-        <Button href="#demo" className="max-sm:pl-4 max-sm:text-[13px]">
+        <Button href={navHref("#demo", home)} className="max-sm:pl-4 max-sm:text-[13px]">
           {CTA.primary}
         </Button>
       </div>

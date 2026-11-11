@@ -7,9 +7,6 @@ const ROWS = [CLIENTS.slice(0, HALF), CLIENTS.slice(HALF)];
 export function LogoMarquee() {
   return (
     <div aria-label="Ils nous font confiance" className="border-y border-line py-10">
-      <p className="container-x mb-8 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
-        Plus de 50 grandes marques & institutions nous font confiance
-      </p>
       <div className="grid gap-6 sm:gap-8">
         {ROWS.map((row, r) => (
           <div key={r} className="mask-fade-x group flex overflow-hidden">

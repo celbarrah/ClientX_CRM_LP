@@ -156,7 +156,7 @@ function findContactId(data: unknown, depth = 0): string | null {
 
 /* ---------- GoHighLevel (Private Integration) ---------- */
 
-async function ghl(api: string, key: string, path: string, body: object) {
+export async function ghl(api: string, key: string, path: string, body: object) {
   const res = await fetch(`${api}${path}`, {
     method: "POST",
     headers: {

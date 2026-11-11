@@ -6,7 +6,7 @@ import { FAQ, CONTACT } from "@/lib/content";
 import { Reveal, SectionHeading, Sticker } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-export function Faq() {
+export function Faq({ items = FAQ }: { items?: readonly { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(0);
   return (
     <section id="faq" className="scroll-mt-24 pb-24 pt-8 sm:pb-32 sm:pt-12">
@@ -21,7 +21,7 @@ export function Faq() {
           </Reveal>
         </div>
         <div className="border-b border-line-strong lg:col-span-7">
-          {FAQ.map((f, i) => {
+          {items.map((f, i) => {
             const isOpen = open === i;
             return (
               <Reveal key={f.q} delay={i * 0.06} className="border-t border-line-strong">

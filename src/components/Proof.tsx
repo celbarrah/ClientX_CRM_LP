@@ -68,15 +68,13 @@ export function Proof() {
         </div>
 
         {/* Trust strip */}
-        <Reveal className="mt-20 grid grid-cols-2 border-y border-line-strong lg:grid-cols-4">
+        <Reveal className="mt-20 grid border-y border-line-strong sm:grid-cols-3">
           {TRUST.map((x, k) => (
             <div
               key={x.value}
               className={cn(
                 "px-4 py-8 text-center",
-                k % 2 === 1 && "border-l border-line-strong",
-                k >= 2 && "border-t border-line-strong lg:border-t-0",
-                k === 2 && "lg:border-l",
+                k > 0 && "border-t border-line-strong sm:border-l sm:border-t-0",
               )}
             >
               <p className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">{x.value}</p>
@@ -88,8 +86,8 @@ export function Proof() {
         {/* Support, written as an editorial line instead of three cards */}
         <Reveal className="mx-auto mt-16 max-w-4xl text-center">
           <p className="text-balance text-2xl font-medium leading-snug tracking-[-0.02em] sm:text-4xl">
-            Et vous n&apos;êtes jamais seul : <Accent>onboarding 1:1</Accent>, support dédié et migration
-            simplifiée par nos eXperts.
+            Et vous n&apos;êtes jamais seul : <Accent>mise en route guidée</Accent> par e-mail et vidéos + 1 appel de 30 min,
+            et migration simplifiée par nos eXperts.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {SUPPORT.items.map((s, k) => (

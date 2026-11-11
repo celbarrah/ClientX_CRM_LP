@@ -23,6 +23,7 @@ export const NAV = [
   { label: "Cas d'usage", href: "#cas-usage" },
   { label: "Tarifs", href: "#tarifs" },
   { label: "FAQ", href: "#faq" },
+  { label: "Partenaires", href: "/partenaires" },
 ];
 
 // Logos are served from /public/clients. tone "gray" = logo with filled shapes that would become a blob as a silhouette.
@@ -90,7 +91,7 @@ export const HERO = {
   perks: [
     "Démo personnalisée sur votre activité",
     "Audit offert de votre stack actuelle",
-    "Onboarding technique 1:1 inclus",
+    "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min",
   ],
 };
 
@@ -271,8 +272,8 @@ export const SUPPORT = {
   accent: "d'eXception",
   subtitle: "Vous n'êtes jamais seul : nos eXperts vous accompagnent de la migration au succès.",
   items: [
-    { title: "Migration simplifiée", text: "Onboarding technique 1:1 : domaines, DNS, e-mails et premiers workflows configurés avec vous." },
-    { title: "Support dédié", text: "Une équipe qui connaît votre compte et vos objectifs, joignable sur plusieurs canaux." },
+    { title: "Migration simplifiée", text: "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min : domaines, DNS, e-mails et premiers workflows." },
+    { title: "Équipe support", text: "Une équipe qui connaît votre compte et vos objectifs, joignable sur plusieurs canaux." },
     { title: "99,9% de disponibilité", text: "Une infrastructure fiable, des données chiffrées et une qualité certifiée ISO 9001." },
   ],
 };
@@ -290,45 +291,87 @@ export const SECTORS_LIST = [
 
 export const TRUST = [
   { value: "ISO 9001", label: "Management de la qualité certifié" },
-  { value: "50+", label: "Grandes marques & institutions" },
   { value: "99,9%", label: "Disponibilité de la plateforme" },
   { value: "RGPD", label: "Données chiffrées, et qui restent les vôtres" },
 ];
 
-// MAD prices are only shown to visitors detected in Morocco (see Pricing.tsx).
-export const CURRENCIES = { eur: { label: "France (€)", symbol: "€" }, mad: { label: "Maroc (MAD)", symbol: "MAD" } } as const;
+// Visitors in Morocco see DH (HT) by default plus a switch; everyone else sees euros.
+// France buys online (payment links, the account is created after payment); Morocco books a demo (Payzone invoice after it).
+export const CURRENCIES = { eur: { label: "France (€)", symbol: "€" }, mad: { label: "Maroc (MAD)", symbol: "DH HT" } } as const;
 export type Currency = keyof typeof CURRENCIES;
 
+export const BILLING = { monthly: { label: "Mensuel", unit: "mois" }, yearly: { label: "Annuel · 2 mois offerts", unit: "an" } } as const;
+export type Billing = keyof typeof BILLING;
+
 export const PRICING = {
-  included: [
-    "Sites web & funnels illimités",
-    "CRM & pipelines de ventes",
-    "Automatisations & workflows",
-  ],
+  setup: { eur: "490", mad: "4 900" },
   plans: [
     {
-      name: "Starter",
-      price: { eur: "990", mad: "14 000" },
-      tagline: "Pour lancer votre croissance.",
-      features: ["3 utilisateurs", "5 000 contacts CRM"],
+      name: "Essentiel",
+      problem: "« Je rate des messages et des rendez-vous »",
+      price: { monthly: { eur: "149", mad: "1 490" }, yearly: { eur: "1 490", mad: "14 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07025b49394de8f594fc",
+        yearly: "https://link.clientx.ai/payment-link/6aeb07045b49394de8f594fd",
+      },
+      intro: "",
+      features: [
+        "Assistant IA texte sur Instagram, Facebook et votre site",
+        "Agendas en ligne",
+        "Rappels de rendez-vous par e-mail",
+        "Relance des rendez-vous manqués",
+        "Demande d'avis Google à tous vos clients",
+        "Bilan à J12, puis chaque mois",
+      ],
+      note: "",
       popular: false,
     },
     {
-      name: "Pro",
-      price: { eur: "2 490", mad: "35 100" },
-      tagline: "Pour les équipes qui accélèrent.",
-      features: ["10 utilisateurs", "15 000 contacts CRM"],
+      name: "Croissance",
+      problem: "« Mes clients ne reviennent pas assez »",
+      price: { monthly: { eur: "249", mad: "2 490" }, yearly: { eur: "2 490", mad: "24 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07055b49394de8f594fe",
+        yearly: "https://link.clientx.ai/payment-link/6aeb07075b49394de8f594ff",
+      },
+      intro: "Tout Essentiel, plus :",
+      features: [
+        "WhatsApp",
+        "Rappels de retour",
+        "Relance des clients inactifs à 60 et 180 jours",
+        "Réactivation de votre base clients",
+        "Campagnes anniversaire, parrainage et saisonnières",
+        "Créneaux de dernière minute",
+      ],
+      note: "",
       popular: true,
     },
     {
-      name: "Scale",
-      price: { eur: "4 990", mad: "70 300" },
-      tagline: "Pour les organisations sans limites.",
-      features: ["Utilisateurs illimités", "Contacts illimités"],
+      name: "Premium",
+      problem: "« Je perds des appels et je n'ai pas de vitrine qui vend »",
+      price: { monthly: { eur: "399", mad: "3 990" }, yearly: { eur: "3 990", mad: "39 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07085b49394de8f59500",
+        yearly: "https://link.clientx.ai/payment-link/6aeb070a5b49394de8f59501",
+      },
+      intro: "Tout Croissance, plus :",
+      features: [
+        "IA vocale",
+        "SMS automatique sur appel manqué",
+        "Rappels de rendez-vous par SMS",
+        "Site complet",
+        "Forfaits, cartes cadeaux et acomptes en ligne",
+        "Pages pour vos publicités",
+      ],
+      note: "",
       popular: false,
     },
   ],
-  aiNote: "Usage des agents IA facturé en supplément, via un solde prépayé.",
+  // 6. Usage is never included: it is paid from the credits wallet.
+  credits: {
+    offer: "5 $ de crédits offerts à l'inscription.",
+    text: "L'abonnement comprend la mise en place et tout le système. L'usage est facturé à la consommation via le portefeuille de crédits : messages traités par l'assistant IA, e-mails envoyés, frais WhatsApp de Meta, SMS et IA vocale.",
+  },
 };
 
 export const FAQ = [
@@ -338,7 +381,7 @@ export const FAQ = [
   },
   {
     q: "Comment se passent l'onboarding et le support ?",
-    a: "Chaque nouveau membre bénéficie d'une session d'onboarding technique 1:1 avec un eXpert ClientX AI pour configurer ses domaines, DNS, e-mails et ses premiers workflows sur mesure.",
+    a: "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min avec un eXpert ClientX AI pour configurer vos domaines, DNS, e-mails et vos premiers workflows.",
   },
   {
     q: "Mes données sont-elles sécurisées et conformes au RGPD ?",
@@ -346,9 +389,85 @@ export const FAQ = [
   },
   {
     q: "Puis-je essayer avant de m'engager ?",
-    a: "Oui. Réservez une démo gratuite sur votre propre activité, puis démarrez un essai accompagné d'un support technique 1:1.",
+    a: "Oui : si vous n'avez obtenu aucun rendez-vous dans les 30 premiers jours, nous vous remboursons la mise en place.",
   },
 ];
+
+/** /partenaires: ClientX Partner Program. */
+export const PARTNERS = {
+  eyebrow: "ClientX Partner Program",
+  title: "Recommandez ou revendez le CRM ClientX et touchez des revenus",
+  accent: "chaque mois.",
+  cta: "Devenir partenaire",
+  plans: [
+    {
+      key: "apporteur",
+      name: "Apporteur d'affaires",
+      who: "Consultants, créateurs de contenu, clients",
+      commission: "20 %",
+      period: "de commission chaque mois",
+      points: [
+        "Votre lien de recommandation personnel",
+        "20 % de commission chaque mois, tant que le client reste abonné",
+        "Rien à installer : nous gérons la démo et la mise en place",
+      ],
+      popular: false,
+    },
+    {
+      key: "agence",
+      name: "Partenaire agence",
+      who: "Agences marketing ou web, intégrateurs",
+      commission: "30 %",
+      period: "de commission chaque mois",
+      points: [
+        "Vous vendez et installez le CRM pour vos clients",
+        "30 % de commission chaque mois, tant que le client reste abonné",
+        "Vous facturez vous-même la mise en place et le support",
+      ],
+      popular: true,
+    },
+  ],
+  benefits: [
+    { title: "Revenus récurrents", text: "Vous êtes payé chaque mois, tant que votre client reste abonné." },
+    { title: "Aucun frais d'inscription", text: "Le programme est gratuit : vous ne payez rien pour devenir partenaire." },
+    { title: "Tableau de bord", text: "Suivez vos clients et vos commissions en temps réel." },
+    { title: "Kit marketing", text: "Visuels, présentation et démo prêts à l'emploi pour convaincre vos contacts." },
+    { title: "Formation et support", text: "Une formation partenaire et une équipe pour vous accompagner." },
+    { title: "Attribution 90 jours", text: "Le client vous est attribué pendant 90 jours après le clic sur votre lien." },
+  ],
+  steps: [
+    { title: "S'inscrire", text: "Remplissez le formulaire de candidature, c'est gratuit." },
+    { title: "Recevoir son lien et son kit", text: "Votre lien de recommandation et votre kit marketing." },
+    { title: "Recommander", text: "Partagez ClientX à vos contacts, clients ou abonnés." },
+    { title: "Être payé chaque mois", text: "Votre commission tombe chaque mois, tant que le client reste abonné." },
+  ],
+  faq: [
+    {
+      q: "Combien vais-je gagner ?",
+      a: "20 % de l'abonnement de chaque client recommandé en tant qu'apporteur d'affaires, 30 % en tant que partenaire agence. La commission est versée chaque mois, tant que le client reste abonné.",
+    },
+    {
+      q: "Quelle formule choisir ?",
+      a: "Apporteur d'affaires si vous recommandez ClientX à votre réseau sans vous occuper de l'installation. Partenaire agence si vous vendez et installez le CRM pour vos clients, et facturez vous-même la mise en place et le support.",
+    },
+    {
+      q: "Comment un client m'est-il attribué ?",
+      a: "Par votre lien de recommandation : le client vous est attribué pendant 90 jours après son clic.",
+    },
+    {
+      q: "L'inscription est-elle payante ?",
+      a: "Non, le programme partenaire est sans frais d'inscription.",
+    },
+    {
+      q: "Comment suivre mes commissions ?",
+      a: "Depuis votre tableau de bord partenaire, qui liste vos clients et vos commissions.",
+    },
+  ],
+  form: {
+    title: "Votre candidature",
+    success: "Merci ! Votre candidature est bien reçue. Notre équipe partenaires vous recontacte rapidement.",
+  },
+};
 
 /** Thank-you pages: /merci (global) and /merci-maroc (visitors in Morocco). Edit each independently. */
 export const THANK_YOU = {

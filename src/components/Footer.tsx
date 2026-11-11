@@ -1,6 +1,7 @@
 import { Mail, Phone } from "lucide-react";
 import { CONTACT, NAV, CTA } from "@/lib/content";
 import { Accent, Button, Eyebrow, Logo, Reveal, Sticker } from "@/components/ui";
+import { navHref } from "@/lib/utils";
 
 /** Dark closing block: final CTA and footer live in the same surface. */
 export function Footer({ cta = false }: { cta?: boolean }) {
@@ -44,7 +45,7 @@ export function Footer({ cta = false }: { cta?: boolean }) {
               <ul className="mt-5 grid gap-3 text-[15px]">
                 {NAV.map((n) => (
                   <li key={n.href}>
-                    <a href={cta ? n.href : `/${n.href}`} className="text-white/70 transition-colors hover:text-brand">{n.label}</a>
+                    <a href={navHref(n.href, cta)} className="text-white/70 transition-colors hover:text-brand">{n.label}</a>
                   </li>
                 ))}
               </ul>

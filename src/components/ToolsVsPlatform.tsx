@@ -44,7 +44,7 @@ export function ToolsVsPlatform() {
             <Logo dark className="relative mt-5 h-8 self-start" />
             <p className="relative mt-4 text-white/60">Une seule plateforme, pilotée par l'IA.</p>
             <ul className="relative mt-7 grid gap-3">
-              {["1 abonnement, 1 connexion", "1 base de données client unifiée", "1 équipe support dédiée", "Données chiffrées, conformes RGPD"].map((x) => (
+              {["1 abonnement, 1 connexion", "1 base de données client unifiée", "1 équipe support", "Données chiffrées, conformes RGPD"].map((x) => (
                 <li key={x} className="flex items-center gap-3 text-[15px]">
                   <span className="grid size-5 place-items-center rounded-full bg-brand text-ink">
                     <Check className="size-3" strokeWidth={3} />

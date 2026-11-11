@@ -38,6 +38,19 @@ const meta = {
   country: z.string().max(2).nullish(),
 };
 
+/** Partner Program application (/partenaires). */
+export const PARTNER_PLANS = ["Apporteur d'affaires", "Partenaire agence"] as const;
+
+export const partnerSchema = stepOneSchema.extend({
+  plan: z.enum(PARTNER_PLANS, { error: "Choisissez une formule" }),
+  company: z.string().trim().max(120).optional(),
+  link: z.string().trim().max(300).optional(),
+  message: z.string().trim().max(1500).optional(),
+  ...meta,
+});
+
+export type PartnerPayload = z.infer<typeof partnerSchema>;
+
 /** Full lead, sent once on final submission. */
 export const payloadSchema = stepOneSchema.extend(stepTwoSchema.shape).extend(meta);
 

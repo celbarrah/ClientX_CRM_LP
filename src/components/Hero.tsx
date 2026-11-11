@@ -61,7 +61,7 @@ export function Hero() {
             <div className="flex items-center gap-2.5 text-sm text-muted">
               <ShieldCheck className="size-5 text-brand-deep" />
               <span>
-                Certifié <span className="font-medium text-ink">ISO 9001</span> · 50+ marques nous font confiance
+                Certifié <span className="font-medium text-ink">ISO 9001</span>
               </span>
             </div>
           </div>

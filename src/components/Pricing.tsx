@@ -1,16 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Sparkles } from "lucide-react";
-import { PRICING, CTA, CURRENCIES, type Currency } from "@/lib/content";
+import { Check, Minus, Sparkles, Wallet } from "lucide-react";
+import { PRICING, CTA, CURRENCIES, BILLING, type Billing, type Currency } from "@/lib/content";
 import { detectCountry } from "@/lib/geo";
 import { Button, Reveal, SectionHeading } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
+/** Pill switch shared by the billing period and the currency. */
+function Switch<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: Record<T, { label: string }>; onChange: (v: T) => void }) {
+  return (
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line-strong bg-surface p-1">
+      {(Object.keys(options) as T[]).map((o) => (
+        <button
+          key={o}
+          type="button"
+          role="radio"
+          aria-checked={value === o}
+          onClick={() => onChange(o)}
+          className={cn("rounded-full px-5 py-2 text-[13px] font-medium", value === o ? "bg-ink text-white" : "text-ink-soft")}
+        >
+          {options[o].label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Pricing() {
-  // Everyone sees euros. Visitors in Morocco get MAD by default plus a switch.
+  // Everyone sees euros. Visitors in Morocco get DH by default plus a switch.
   const [inMorocco, setInMorocco] = useState(false);
   const [currency, setCurrency] = useState<Currency>("eur");
+  const [billing, setBilling] = useState<Billing>("monthly");
 
   useEffect(() => {
     detectCountry().then((c) => {
@@ -21,6 +42,15 @@ export function Pricing() {
   }, []);
 
   const symbol = CURRENCIES[currency].symbol;
+  // France pays online with the payment links; Morocco books a demo and pays by invoice afterwards.
+  const buysOnline = currency === "eur";
+  const setup = `${PRICING.setup[currency]} ${symbol}`;
+  const terms =
+    billing === "monthly"
+      ? `+ ${setup} de mise en place, une seule fois · Sans engagement`
+      : buysOnline
+        ? "Mise en place offerte · 2 mois offerts"
+        : "2 mois offerts"; // MA yearly: setup fee not shown until Joris confirms
 
   return (
     <section id="tarifs" className="scroll-mt-24 py-20 sm:py-28">
@@ -29,32 +59,15 @@ export function Pricing() {
           eyebrow="Tarifs"
           title="Combien coûte"
           accent="ClientX AI ?"
-          subtitle={`Des formules annuelles simples et transparentes. 0 ${symbol} de coûts cachés.`}
+          subtitle="Au mois sans engagement, ou à l'année avec 2 mois et la mise en place offerts."
         />
 
-        {inMorocco && (
-          <div className="mt-10 flex justify-center">
-            <div role="radiogroup" aria-label="Devise" className="inline-flex rounded-full border border-line-strong bg-surface p-1">
-              {(Object.keys(CURRENCIES) as Currency[]).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={currency === c}
-                  onClick={() => setCurrency(c)}
-                  className={cn(
-                    "rounded-full px-5 py-2 text-[13px] font-medium",
-                    currency === c ? "bg-ink text-white" : "text-ink-soft",
-                  )}
-                >
-                  {CURRENCIES[c].label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Switch label="Période de facturation" value={billing} options={BILLING} onChange={setBilling} />
+          {inMorocco && <Switch label="Devise" value={currency} options={CURRENCIES} onChange={setCurrency} />}
+        </div>
 
-        <div className={cn("grid items-stretch gap-4 lg:grid-cols-3", inMorocco ? "mt-12" : "mt-16")}>
+        <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-3">
           {PRICING.plans.map((p, i) => (
             <Reveal
               key={p.name}
@@ -76,33 +89,38 @@ export function Pricing() {
                     </span>
                   )}
                 </div>
-                <p className={cn("mt-3 text-[15px]", p.popular ? "text-white/60" : "text-muted")}>{p.tagline}</p>
-                <p className="mt-8 flex items-baseline gap-1.5">
+                <p className={cn("mt-3 text-[15px] italic", p.popular ? "text-white/70" : "text-ink-soft")}>{p.problem}</p>
+                <p className="mt-8 flex flex-wrap items-baseline gap-1.5">
                   <span className="flex items-baseline gap-1.5 whitespace-nowrap">
-                    <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[currency]}</span>
+                    <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[billing][currency]}</span>
                     <span className="text-2xl font-semibold">{symbol}</span>
                   </span>
-                  <span className={cn("ml-1 text-sm", p.popular ? "text-white/50" : "text-muted")}>/ an</span>
+                  <span className={cn("ml-1 text-sm", p.popular ? "text-white/50" : "text-muted")}>/ {BILLING[billing].unit}</span>
                 </p>
+                <p className={cn("mt-3 text-[13px]", p.popular ? "text-white/60" : "text-muted")}>{terms}</p>
                 <div className={cn("my-8 h-px", p.popular ? "bg-white/10" : "bg-line")} />
+                {p.intro && <p className={cn("mb-3.5 text-[14px] font-medium", p.popular ? "text-white/70" : "text-ink-soft")}>{p.intro}</p>}
                 <ul className="grid gap-3.5 text-[15px]">
-                  {[...p.features, ...PRICING.included].map((f, fi) => (
+                  {p.features.map((f) => (
                     <li key={f} className="flex items-center gap-3">
-                      <span
-                        className={cn(
-                          "grid size-5 shrink-0 place-items-center rounded-full",
-                          fi < p.features.length ? "bg-brand text-ink" : p.popular ? "bg-white/10 text-brand" : "bg-brand-soft text-brand-deep",
-                        )}
-                      >
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand text-ink">
                         <Check className="size-3" strokeWidth={3} />
                       </span>
-                      <span className={cn(fi < p.features.length && "font-medium")}>{f}</span>
+                      <span className="font-medium">{f}</span>
                     </li>
                   ))}
+                  {p.note && (
+                    <li className={cn("flex items-center gap-3", p.popular ? "text-white/50" : "text-muted")}>
+                      <span className={cn("grid size-5 shrink-0 place-items-center rounded-full", p.popular ? "bg-white/10" : "bg-line")}>
+                        <Minus className="size-3" strokeWidth={3} />
+                      </span>
+                      {p.note}
+                    </li>
+                  )}
                 </ul>
                 <div className="mt-auto pt-10">
-                  <Button href="#demo" variant={p.popular ? "brand" : "dark"} className="w-full justify-between">
-                    {CTA.primary}
+                  <Button href={buysOnline ? p.paymentLinks[billing] : "#demo"} variant={p.popular ? "brand" : "dark"} className="w-full justify-between">
+                    {buysOnline ? `Choisir ${p.name}` : CTA.primary}
                   </Button>
                 </div>
               </div>
@@ -112,10 +130,11 @@ export function Pricing() {
 
         <Reveal className="mx-auto mt-12 flex max-w-2xl flex-col items-center gap-3 rounded-2xl border border-line bg-surface px-6 py-5 text-center sm:flex-row sm:text-left">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-brand">
-            <Sparkles className="size-4" />
+            <Wallet className="size-4" />
           </span>
           <p className="text-[14px] leading-relaxed text-ink-soft">
-            <span className="font-medium text-ink">Tous les plans sont facturés annuellement.</span> {PRICING.aiNote}
+            <span className="font-medium text-ink">{PRICING.credits.offer}</span> {PRICING.credits.text}
+            {!buysOnline && <span className="mt-1 block font-medium text-ink">Prix HT, TVA 20 % en sus.</span>}
           </p>
         </Reveal>
       </div>
