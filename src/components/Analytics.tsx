@@ -7,7 +7,9 @@ import { captureAttribution } from "@/lib/attribution";
 // IDs are injected into inline scripts, so only allow their expected characters.
 const clean = (v?: string) => v?.trim().replace(/[^A-Za-z0-9-]/g, "") || undefined;
 const GOOGLE_TAG_ID = clean(process.env.NEXT_PUBLIC_GOOGLE_TAG_ID);
-const META_PIXEL_ID = clean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+// One or more Meta pixels, comma-separated ("1250950373673981,1101284526029680"): all get the same events.
+const META_PIXEL_IDS = (process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "").split(",").map(clean).filter((id): id is string => !!id);
+const META_PIXEL_ID = META_PIXEL_IDS.length > 0;
 const isGTM = GOOGLE_TAG_ID?.startsWith("GTM-");
 
 /**
@@ -38,7 +40,7 @@ export function Analytics() {
 
       {META_PIXEL_ID && (
         <Script id="meta-pixel" strategy="afterInteractive">
-          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`}
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');${META_PIXEL_IDS.map((id) => `fbq('init','${id}');`).join("")}fbq('track','PageView');`}
         </Script>
       )}
     </>
@@ -79,6 +81,14 @@ function whenTagsReady(fire: (w: Win) => void) {
   attempt();
 }
 
+/**
+ * Meta events are sent from this code only when this code loaded the pixels (NEXT_PUBLIC_META_PIXEL_ID).
+ * Then the Meta tags in GTM must stay paused, or every event counts twice.
+ * Without it, GTM owns the Meta events (it listens to the dataLayer events below).
+ * One fbq('track', …) call reaches every initialised pixel.
+ */
+const sitePixel = (w: Win) => (META_PIXEL_ID ? w.fbq : undefined);
+
 function pushDataLayer(data: Record<string, unknown>) {
   const w = window as Win;
   w.dataLayer = w.dataLayer || [];
@@ -93,16 +103,33 @@ export function trackFormStep(step: number, stepName: string, totalSteps = 2) {
   const params = { form_name: "demo", form_step: step, form_step_name: stepName, form_total_steps: totalSteps };
   pushDataLayer({ event: "form_step_complete", ...params });
   whenTagsReady((w) => {
-    w.fbq?.("trackCustom", "FormStepComplete", params);
+    sitePixel(w)?.("trackCustom", "FormStepComplete", params);
     if (!isGTM) w.gtag?.("event", "form_step_complete", params);
   });
 }
 
-/** Conversion event, fired on the thank-you page after a real submission. */
-export function trackLead(data: { sector?: string; teamSize?: string }) {
-  pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize });
+/**
+ * Fired right after the form is accepted by the server, before the redirect to the thank-you page.
+ * No personal data: sector, team size and market only.
+ */
+export function trackFormSubmit(data: { sector?: string; teamSize?: string; market?: string }) {
+  const maroc = data.market === "MA";
+  // One event per market: form_submitted_maroc / form_submitted_global (Meta: FormSubmittedMaroc / FormSubmittedGlobal).
+  const name = maroc ? "form_submitted_maroc" : "form_submitted_global";
+  const metaName = maroc ? "FormSubmittedMaroc" : "FormSubmittedGlobal";
+  const params = { form_name: "demo", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: maroc ? "MA" : "global" };
+  pushDataLayer({ event: name, ...params });
   whenTagsReady((w) => {
-    w.fbq?.("track", "Lead", { content_category: data.sector });
+    sitePixel(w)?.("trackCustom", metaName, params);
+    if (!isGTM) w.gtag?.("event", name, params);
+  });
+}
+
+/** Conversion event, fired on the thank-you page after a real submission. */
+export function trackLead(data: { sector?: string; teamSize?: string; market?: string }) {
+  pushDataLayer({ event: "generate_lead", lead_sector: data.sector, lead_team_size: data.teamSize, lead_market: data.market });
+  whenTagsReady((w) => {
+    sitePixel(w)?.("track", "Lead", { content_category: data.sector });
     if (!isGTM) w.gtag?.("event", "generate_lead", { lead_sector: data.sector });
   });
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhone } from "./phone";
 
 export const SECTORS = [
   "Assurance & Banque",
@@ -18,10 +19,8 @@ export const stepOneSchema = z.object({
   firstName: z.string().trim().min(2, "Prénom requis"),
   lastName: z.string().trim().min(2, "Nom requis"),
   email: z.email("E-mail invalide"),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9 ().-]{8,20}$/, "Numéro invalide"),
+  // Always sent as E.164 ("+212691357226"): the form builds it from the country selector + the number.
+  phone: z.string().trim().refine(isValidPhone, "Numéro invalide : vérifiez le pays et le nombre de chiffres"),
 });
 
 export const stepTwoSchema = z.object({
@@ -35,7 +34,22 @@ const meta = {
   website: z.string().max(0).optional(),
   utm: z.record(z.string().max(40), z.string().max(600)).optional(),
   page: z.string().optional(),
+  // Browser-side country (honours ?pays= for QA). Only used when the host sends no IP header.
+  country: z.string().max(2).nullish(),
 };
+
+/** Partner Program application (/partenaires). */
+export const PARTNER_PLANS = ["Apporteur d'affaires", "Partenaire agence"] as const;
+
+export const partnerSchema = stepOneSchema.extend({
+  plan: z.enum(PARTNER_PLANS, { error: "Choisissez une formule" }),
+  company: z.string().trim().max(120).optional(),
+  link: z.string().trim().max(300).optional(),
+  message: z.string().trim().max(1500).optional(),
+  ...meta,
+});
+
+export type PartnerPayload = z.infer<typeof partnerSchema>;
 
 /** Full lead, sent once on final submission. */
 export const payloadSchema = stepOneSchema.extend(stepTwoSchema.shape).extend(meta);

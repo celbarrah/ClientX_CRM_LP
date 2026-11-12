@@ -5,31 +5,39 @@ import { useRouter } from "next/navigation";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Loader2, Lock } from "lucide-react";
 import { SECTORS, TEAM_SIZES, stepOneSchema, stepTwoSchema } from "@/lib/schema";
-import { CTA } from "@/lib/content";
+import { copy, type Copy, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { pathIn } from "@/lib/lang";
 import { getAttribution } from "@/lib/attribution";
-import { trackFormStep } from "@/components/Analytics";
+import { detectCountry } from "@/lib/geo";
+import { trackFormStep, trackFormSubmit } from "@/components/Analytics";
+import { Field, PhoneInput, inputCls, phoneHint, submitCls, usePhone } from "@/components/form";
 
 const formSchema = stepOneSchema.extend(stepTwoSchema.shape).extend({ website: z.string().optional() });
 type FormValues = z.infer<typeof formSchema>;
 
 const STEP_ONE: FieldPath<FormValues>[] = ["firstName", "lastName", "email", "phone"];
 
-async function send(body: object) {
+async function send(body: object, THANK_YOU: Copy["THANK_YOU"]) {
   const res = await fetch("/api/lead", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
     keepalive: true,
   });
-  return res.ok;
+  if (!res.ok) return null;
+  // The server says which market (IP) the lead belongs to, so the right thank-you page opens.
+  const data = await res.json().catch(() => ({}));
+  return data.market === "MA" ? THANK_YOU.MA.path : THANK_YOU.global.path;
 }
 
 
-export function DemoForm() {
+export function DemoForm({ lang = "fr" }: { lang?: Lang }) {
+  const { CTA, THANK_YOU, UI, SECTOR_LABELS, ERRORS, PHONE_NAMES } = copy(lang);
+  const f = UI.form;
+  const err = (m?: string) => (m ? (ERRORS[m] ?? m) : undefined);
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -48,7 +56,10 @@ export function DemoForm() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(formSchema), mode: "onTouched" });
+  } = useForm<FormValues>({ resolver: zodResolver(formSchema), mode: "onTouched", defaultValues: { phone: "" } });
+
+  // Phone: country selector + digits only; the form value is always the E.164 number (see usePhone).
+  const phone = usePhone((e164, tidy) => setValue("phone", e164, { shouldValidate: Boolean(errors.phone) || tidy }));
 
   const teamSize = watch("teamSize");
 
@@ -61,15 +72,18 @@ export function DemoForm() {
   // Data is sent once, only on final submission, then the visitor goes to the thank-you page.
   const onSubmit = async (v: FormValues) => {
     setStatus("sending");
-    const ok = await send({ ...v, utm: getAttribution(), page: window.location.href }).catch(() => false);
-    if (!ok) return setStatus("error");
+    // The server picks the Morocco or global account from the IP; the browser's guess is only a fallback.
+    const country = await detectCountry().catch(() => null);
+    const thankYou = await send({ ...v, utm: getAttribution(), page: window.location.href, country }, THANK_YOU).catch(() => null);
+    if (!thankYou) return setStatus("error");
     stepDone(2, "entreprise");
+    trackFormSubmit({ sector: v.sector, teamSize: v.teamSize, market: thankYou === THANK_YOU.MA.path ? "MA" : "global" });
     setStatus("success");
     try {
-      // Lets /merci fire the conversion only after a real submission.
+      // Lets the thank-you page fire the conversion only after a real submission.
       sessionStorage.setItem("cx_lead", JSON.stringify({ firstName: v.firstName, sector: v.sector, teamSize: v.teamSize }));
     } catch {}
-    router.push("/merci");
+    router.push(thankYou);
   };
 
   return (
@@ -81,10 +95,10 @@ export function DemoForm() {
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-deep">
-                Étape {step} sur 2
+                {f.step(step)}
               </p>
               <h3 className="mt-1.5 text-xl font-semibold tracking-tight sm:text-[1.4rem]">
-                {step === 1 ? "Vos coordonnées" : "Votre entreprise"}
+                {step === 1 ? f.contactTitle : f.companyTitle}
               </h3>
             </div>
             <div className="flex items-center gap-1.5 pt-1">
@@ -92,7 +106,7 @@ export function DemoForm() {
                 <span
                   key={s}
                   className={cn(
-                    "h-1.5 rounded-full transition-all duration-500",
+                    "h-1.5 rounded-full",
                     s <= step ? "w-8 bg-brand" : "w-4 bg-ink/10",
                   )}
                 />
@@ -104,61 +118,46 @@ export function DemoForm() {
             {/* Honeypot */}
             <input type="text" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden {...register("website")} />
 
-            <AnimatePresence mode="wait" initial={false}>
-              {step === 1 ? (
-                <motion.div
-                  key="s1"
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="grid gap-3.5"
-                >
+            {step === 1 ? (
+                <div key="s1" className="grid gap-3.5">
                   <div className="grid gap-3.5 sm:grid-cols-2">
-                    <Field label="Prénom" error={errors.firstName?.message}>
+                    <Field label={f.firstName} error={err(errors.firstName?.message)}>
                       <input {...register("firstName")} autoComplete="given-name" placeholder="Sarah" className={inputCls(!!errors.firstName)} />
                     </Field>
-                    <Field label="Nom" error={errors.lastName?.message}>
+                    <Field label={f.lastName} error={err(errors.lastName?.message)}>
                       <input {...register("lastName")} autoComplete="family-name" placeholder="Benali" className={inputCls(!!errors.lastName)} />
                     </Field>
                   </div>
-                  <Field label="E-mail professionnel" error={errors.email?.message}>
-                    <input {...register("email")} type="email" autoComplete="email" inputMode="email" placeholder="sarah@entreprise.com" className={inputCls(!!errors.email)} />
+                  <Field label={f.workEmail} error={err(errors.email?.message)}>
+                    <input {...register("email")} type="email" autoComplete="email" inputMode="email" placeholder={f.emailPlaceholder} className={inputCls(!!errors.email)} />
                   </Field>
-                  <Field label="Téléphone" error={errors.phone?.message}>
-                    <input {...register("phone")} type="tel" autoComplete="tel" inputMode="tel" placeholder="+33 6 12 34 56 78" className={inputCls(!!errors.phone)} />
+                  <Field group label={f.phone} error={err(errors.phone?.message)} hint={errors.phone ? phoneHint(phone.country, f) : undefined}>
+                    <PhoneInput {...phone.inputProps} invalid={!!errors.phone} t={f} names={PHONE_NAMES} />
                   </Field>
                   <button type="button" onClick={next} className={submitCls}>
-                    Continuer
-                    <span className="grid size-9 place-items-center rounded-full bg-brand text-ink transition-transform duration-300 group-hover:translate-x-0.5">
+                    {f.next}
+                    <span className="grid size-9 place-items-center rounded-full bg-brand text-ink">
                       <ArrowRight className="size-4" strokeWidth={2.2} />
                     </span>
                   </button>
-                </motion.div>
+                </div>
               ) : (
-                <motion.div
-                  key="s2"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 16 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="grid gap-3.5"
-                >
-                  <Field label="Entreprise" error={errors.company?.message}>
-                    <input {...register("company")} autoComplete="organization" placeholder="Nom de votre entreprise" className={inputCls(!!errors.company)} />
+                <div key="s2" className="grid gap-3.5">
+                  <Field label={f.company} error={err(errors.company?.message)}>
+                    <input {...register("company")} autoComplete="organization" placeholder={f.companyPlaceholder} className={inputCls(!!errors.company)} />
                   </Field>
-                  <Field label="Secteur d'activité" error={errors.sector?.message}>
+                  <Field label={f.sector} error={err(errors.sector?.message)}>
                     <div className="relative">
                       <select {...register("sector")} defaultValue="" className={cn(inputCls(!!errors.sector), "appearance-none pr-10")}>
-                        <option value="" disabled>Sélectionnez votre secteur</option>
+                        <option value="" disabled>{f.sectorPlaceholder}</option>
                         {SECTORS.map((s) => (
-                          <option key={s} value={s}>{s}</option>
+                          <option key={s} value={s}>{SECTOR_LABELS[s] ?? s}</option>
                         ))}
                       </select>
                       <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
                     </div>
                   </Field>
-                  <Field group label="Taille de l'équipe" error={errors.teamSize?.message}>
+                  <Field group label={f.teamSize} error={err(errors.teamSize?.message)}>
                     <div role="radiogroup" className="grid grid-cols-5 gap-1.5">
                       {TEAM_SIZES.map((t) => (
                         <button
@@ -168,7 +167,7 @@ export function DemoForm() {
                           aria-checked={teamSize === t}
                           onClick={() => setValue("teamSize", t, { shouldValidate: true })}
                           className={cn(
-                            "h-11 rounded-xl border text-[13px] font-medium tabular-nums transition-all",
+                            "h-11 rounded-xl border text-[13px] font-medium tabular-nums",
                             teamSize === t
                               ? "border-ink bg-ink text-white shadow-[0_0_0_3px_rgb(50_220_50/0.35)]"
                               : "border-line-strong bg-canvas text-ink-soft hover:border-ink/40",
@@ -183,13 +182,13 @@ export function DemoForm() {
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      aria-label="Retour"
+                      aria-label={f.back}
                       className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-line-strong transition-colors hover:bg-surface"
                     >
                       <ArrowLeft className="size-4" />
                     </button>
                     <button type="submit" disabled={status === "sending" || status === "success"} className={cn(submitCls, "flex-1")}>
-                      {status === "sending" ? "Envoi…" : status === "success" ? "Redirection…" : CTA.primary}
+                      {status === "sending" ? f.sending : status === "success" ? f.redirecting : CTA.primary}
                       <span className="grid size-9 place-items-center rounded-full bg-brand text-ink">
                         {status === "sending" || status === "success" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" strokeWidth={2.4} />}
                       </span>
@@ -197,20 +196,19 @@ export function DemoForm() {
                   </div>
                   {status === "error" && (
                     <p role="alert" className="text-[13px] text-red-500">
-                      L&apos;envoi a échoué. Réessayez, ou écrivez-nous à contact@clientx.ai.
+                      {f.error}
                     </p>
                   )}
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </form>
 
           <p className="mt-5 flex items-start gap-2 text-[12px] leading-relaxed text-muted">
             <Lock className="mt-0.5 size-3.5 shrink-0" />
             <span>
-              Vos données sont chiffrées et ne sont jamais revendues. En continuant, vous acceptez notre{" "}
-              <a href="/politique-de-confidentialite" className="underline decoration-line-strong underline-offset-2 hover:text-ink">
-                politique de confidentialité
+              {f.privacy}{" "}
+              <a href={pathIn("/politique-de-confidentialite", lang)} className="underline decoration-line-strong underline-offset-2 hover:text-ink">
+                {f.privacyLink}
               </a>
               .
             </span>
@@ -221,34 +219,3 @@ export function DemoForm() {
   );
 }
 
-const inputCls = (invalid: boolean) =>
-  cn(
-    "h-12 w-full rounded-xl border bg-canvas px-4 text-[15px] text-ink outline-none transition-all placeholder:text-ink/30",
-    "focus:border-ink focus:shadow-[0_0_0_4px_rgb(50_220_50/0.22)]",
-    invalid ? "border-red-400" : "border-line-strong hover:border-ink/30",
-  );
-
-const submitCls =
-  "group mt-1 inline-flex h-14 w-full items-center justify-between rounded-full bg-ink pl-6 pr-2.5 text-[15px] font-medium text-white transition-all duration-300 hover:shadow-glow disabled:opacity-80";
-
-function Field({ label, error, group, children }: { label: string; error?: string; group?: boolean; children: React.ReactNode }) {
-  const Tag = group ? "div" : "label";
-  return (
-    <Tag className="grid gap-1.5">
-      <span className="text-[13px] font-medium text-ink-soft">{label}</span>
-      {children}
-      <AnimatePresence>
-        {error && (
-          <motion.span
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="text-[12px] text-red-500"
-          >
-            {error}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </Tag>
-  );
-}

@@ -2,7 +2,8 @@
 // Items marked PLACEHOLDER must be replaced with real client data before going live.
 
 export const DEMO_VIDEO =
-  "https://assets.cdn.filesafe.space/zoW9RVMsMP37fO8WXMgD/media/7a3c0f19-4e92-49b4-a9b2-2a7f4f0e5181.mp4#t=0.5";
+  // #t=0.5 shows a frame of the video as its thumbnail before play.
+  "https://res.cloudinary.com/dofyrwzop/video/upload/v1792158049/Explainer_V2_AI_Employee_1__fr-FR_dubbed_a8ogus.mp4#t=0.5";
 
 export const CTA = {
   primary: "Réserver une Démo",
@@ -22,6 +23,7 @@ export const NAV = [
   { label: "Cas d'usage", href: "#cas-usage" },
   { label: "Tarifs", href: "#tarifs" },
   { label: "FAQ", href: "#faq" },
+  { label: "Partenaires", href: "/partenaires" },
 ];
 
 // Logos are served from /public/clients. tone "gray" = logo with filled shapes that would become a blob as a silhouette.
@@ -89,7 +91,7 @@ export const HERO = {
   perks: [
     "Démo personnalisée sur votre activité",
     "Audit offert de votre stack actuelle",
-    "Onboarding technique 1:1 inclus",
+    "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min",
   ],
 };
 
@@ -270,8 +272,8 @@ export const SUPPORT = {
   accent: "d'eXception",
   subtitle: "Vous n'êtes jamais seul : nos eXperts vous accompagnent de la migration au succès.",
   items: [
-    { title: "Migration simplifiée", text: "Onboarding technique 1:1 : domaines, DNS, e-mails et premiers workflows configurés avec vous." },
-    { title: "Support dédié", text: "Une équipe qui connaît votre compte et vos objectifs, joignable sur plusieurs canaux." },
+    { title: "Migration simplifiée", text: "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min : domaines, DNS, e-mails et premiers workflows." },
+    { title: "Équipe support", text: "Une équipe qui connaît votre compte et vos objectifs, joignable sur plusieurs canaux." },
     { title: "99,9% de disponibilité", text: "Une infrastructure fiable, des données chiffrées et une qualité certifiée ISO 9001." },
   ],
 };
@@ -289,45 +291,87 @@ export const SECTORS_LIST = [
 
 export const TRUST = [
   { value: "ISO 9001", label: "Management de la qualité certifié" },
-  { value: "50+", label: "Grandes marques & institutions" },
   { value: "99,9%", label: "Disponibilité de la plateforme" },
   { value: "RGPD", label: "Données chiffrées, et qui restent les vôtres" },
 ];
 
-// MAD prices are only shown to visitors detected in Morocco (see Pricing.tsx).
-export const CURRENCIES = { eur: { label: "France (€)", symbol: "€" }, mad: { label: "Maroc (MAD)", symbol: "MAD" } } as const;
+// Visitors in Morocco see DH (HT) by default plus a switch; everyone else sees euros.
+// France buys online (payment links, the account is created after payment); Morocco books a demo (Payzone invoice after it).
+export const CURRENCIES = { eur: { label: "France (€)", symbol: "€ HT" }, mad: { label: "Maroc (MAD)", symbol: "DH HT" } } as const;
 export type Currency = keyof typeof CURRENCIES;
 
+export const BILLING = { monthly: { label: "Mensuel", unit: "mois" }, yearly: { label: "Annuel · 2 mois offerts", unit: "an" } } as const;
+export type Billing = keyof typeof BILLING;
+
 export const PRICING = {
-  included: [
-    "Sites web & funnels illimités",
-    "CRM & pipelines de ventes",
-    "Automatisations & workflows",
-  ],
+  setup: { eur: "490", mad: "4 900" },
   plans: [
     {
-      name: "Starter",
-      price: { eur: "990", mad: "14 000" },
-      tagline: "Pour lancer votre croissance.",
-      features: ["3 utilisateurs", "5 000 contacts CRM"],
+      name: "Essentiel",
+      problem: "« Je rate des messages et des rendez-vous »",
+      price: { monthly: { eur: "149", mad: "1 490" }, yearly: { eur: "1 490", mad: "14 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07025b49394de8f594fc",
+        yearly: "https://link.clientx.ai/payment-link/6aeb07045b49394de8f594fd",
+      },
+      intro: "",
+      features: [
+        "Assistant IA texte sur Instagram, Facebook et votre site",
+        "Agendas en ligne",
+        "Rappels de rendez-vous par e-mail",
+        "Relance des rendez-vous manqués",
+        "Demande d'avis Google à tous vos clients",
+        "Bilan à J12, puis chaque mois",
+      ],
+      note: "",
       popular: false,
     },
     {
-      name: "Pro",
-      price: { eur: "2 490", mad: "35 100" },
-      tagline: "Pour les équipes qui accélèrent.",
-      features: ["10 utilisateurs", "15 000 contacts CRM"],
+      name: "Croissance",
+      problem: "« Mes clients ne reviennent pas assez »",
+      price: { monthly: { eur: "249", mad: "2 490" }, yearly: { eur: "2 490", mad: "24 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07055b49394de8f594fe",
+        yearly: "https://link.clientx.ai/payment-link/6aeb07075b49394de8f594ff",
+      },
+      intro: "Tout Essentiel, plus :",
+      features: [
+        "WhatsApp",
+        "Rappels de retour",
+        "Relance des clients inactifs à 60 et 180 jours",
+        "Réactivation de votre base clients",
+        "Campagnes anniversaire, parrainage et saisonnières",
+        "Créneaux de dernière minute",
+      ],
+      note: "",
       popular: true,
     },
     {
-      name: "Scale",
-      price: { eur: "4 990", mad: "70 300" },
-      tagline: "Pour les organisations sans limites.",
-      features: ["Utilisateurs illimités", "Contacts illimités"],
+      name: "Premium",
+      problem: "« Je perds des appels et je n'ai pas de vitrine qui vend »",
+      price: { monthly: { eur: "399", mad: "3 990" }, yearly: { eur: "3 990", mad: "39 900" } },
+      paymentLinks: {
+        monthly: "https://link.clientx.ai/payment-link/6aeb07085b49394de8f59500",
+        yearly: "https://link.clientx.ai/payment-link/6aeb070a5b49394de8f59501",
+      },
+      intro: "Tout Croissance, plus :",
+      features: [
+        "IA vocale",
+        "SMS automatique sur appel manqué",
+        "Rappels de rendez-vous par SMS",
+        "Site complet",
+        "Forfaits, cartes cadeaux et acomptes en ligne",
+        "Pages pour vos publicités",
+      ],
+      note: "",
       popular: false,
     },
   ],
-  aiNote: "Usage des agents IA facturé en supplément, via un solde prépayé.",
+  // 6. Usage is never included: it is paid from the credits wallet.
+  credits: {
+    offer: "5 $ de crédits offerts à l'inscription.",
+    text: "L'abonnement comprend la mise en place et tout le système. L'usage est facturé à la consommation via le portefeuille de crédits : messages traités par l'assistant IA, e-mails envoyés, frais WhatsApp de Meta, SMS et IA vocale.",
+  },
 };
 
 export const FAQ = [
@@ -337,7 +381,7 @@ export const FAQ = [
   },
   {
     q: "Comment se passent l'onboarding et le support ?",
-    a: "Chaque nouveau membre bénéficie d'une session d'onboarding technique 1:1 avec un eXpert ClientX AI pour configurer ses domaines, DNS, e-mails et ses premiers workflows sur mesure.",
+    a: "Mise en route guidée par e-mail et vidéos + 1 appel de 30 min avec un eXpert ClientX AI pour configurer vos domaines, DNS, e-mails et vos premiers workflows.",
   },
   {
     q: "Mes données sont-elles sécurisées et conformes au RGPD ?",
@@ -345,15 +389,111 @@ export const FAQ = [
   },
   {
     q: "Puis-je essayer avant de m'engager ?",
-    a: "Oui. Réservez une démo gratuite sur votre propre activité, puis démarrez un essai accompagné d'un support technique 1:1.",
+    a: "Oui : vous avez une garantie de 30 jours. Si vous n'êtes pas satisfait, nous vous remboursons votre abonnement, moins la valeur de la mise en place.",
   },
 ];
 
-export const THANK_YOU_STEPS = [
-  { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
-  { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo." },
-  { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
-];
+/** /partenaires: ClientX Partner Program. */
+export const PARTNERS = {
+  eyebrow: "ClientX Partner Program",
+  title: "Recommandez ou revendez le CRM ClientX et touchez des revenus",
+  accent: "chaque mois.",
+  cta: "Devenir partenaire",
+  plans: [
+    {
+      key: "apporteur",
+      name: "Apporteur d'affaires",
+      who: "Consultants, créateurs de contenu, clients",
+      commission: "20 %",
+      period: "de commission chaque mois",
+      points: [
+        "Votre lien de recommandation personnel",
+        "20 % de commission chaque mois, tant que le client reste abonné",
+        "Rien à installer : nous gérons la démo et la mise en place",
+      ],
+      popular: false,
+    },
+    {
+      key: "agence",
+      name: "Partenaire agence",
+      who: "Agences marketing ou web, intégrateurs",
+      commission: "30 %",
+      period: "de commission chaque mois",
+      points: [
+        "Vous vendez et installez le CRM pour vos clients",
+        "30 % de commission chaque mois, tant que le client reste abonné",
+        "Vous facturez vous-même la mise en place et le support",
+      ],
+      popular: true,
+    },
+  ],
+  benefits: [
+    { title: "Revenus récurrents", text: "Vous êtes payé chaque mois, tant que votre client reste abonné." },
+    { title: "Aucun frais d'inscription", text: "Le programme est gratuit : vous ne payez rien pour devenir partenaire." },
+    { title: "Tableau de bord", text: "Suivez vos clients et vos commissions en temps réel." },
+    { title: "Kit marketing", text: "Visuels, présentation et démo prêts à l'emploi pour convaincre vos contacts." },
+    { title: "Formation et support", text: "Une formation partenaire et une équipe pour vous accompagner." },
+    { title: "Attribution 90 jours", text: "Le client vous est attribué pendant 90 jours après le clic sur votre lien." },
+  ],
+  steps: [
+    { title: "S'inscrire", text: "Remplissez le formulaire de candidature, c'est gratuit." },
+    { title: "Recevoir son lien et son kit", text: "Votre lien de recommandation et votre kit marketing." },
+    { title: "Recommander", text: "Partagez ClientX à vos contacts, clients ou abonnés." },
+    { title: "Être payé chaque mois", text: "Votre commission tombe chaque mois, tant que le client reste abonné." },
+  ],
+  faq: [
+    {
+      q: "Combien vais-je gagner ?",
+      a: "20 % de l'abonnement de chaque client recommandé en tant qu'apporteur d'affaires, 30 % en tant que partenaire agence. La commission est versée chaque mois, tant que le client reste abonné.",
+    },
+    {
+      q: "Quelle formule choisir ?",
+      a: "Apporteur d'affaires si vous recommandez ClientX à votre réseau sans vous occuper de l'installation. Partenaire agence si vous vendez et installez le CRM pour vos clients, et facturez vous-même la mise en place et le support.",
+    },
+    {
+      q: "Comment un client m'est-il attribué ?",
+      a: "Par votre lien de recommandation : le client vous est attribué pendant 90 jours après son clic.",
+    },
+    {
+      q: "L'inscription est-elle payante ?",
+      a: "Non, le programme partenaire est sans frais d'inscription.",
+    },
+    {
+      q: "Comment suivre mes commissions ?",
+      a: "Depuis votre tableau de bord partenaire, qui liste vos clients et vos commissions.",
+    },
+  ],
+  form: {
+    title: "Votre candidature",
+    success: "Merci ! Votre candidature est bien reçue. Notre équipe partenaires vous recontacte rapidement.",
+  },
+};
+
+/** Thank-you pages: /merci (global) and /merci-maroc (visitors in Morocco). Edit each independently. */
+export const THANK_YOU = {
+  global: {
+    path: "/merci",
+    eyebrow: "Demande envoyée",
+    steps: [
+      { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
+      { title: "Prise de contact", text: "Un eXpert ClientX AI vous contacte sous 24h pour planifier votre démo." },
+      { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
+    ],
+    email: CONTACT.email,
+    phone: CONTACT.phone,
+  },
+  MA: {
+    path: "/merci-maroc",
+    eyebrow: "Demande envoyée · Maroc",
+    steps: [
+      { title: "Confirmation", text: "Vous recevez la confirmation de votre demande par e-mail et SMS." },
+      { title: "Prise de contact", text: "Un eXpert ClientX AI au Maroc vous contacte sous 24h pour planifier votre démo." },
+      { title: "Votre démo", text: "Nous vous présentons la plateforme, personnalisée pour votre activité." },
+    ],
+    email: CONTACT.email,
+    phone: CONTACT.phone,
+  },
+} as const;
 
 export type SectorKey =
   | "assurance" | "auto" | "ecoles" | "ecommerce" | "energie" | "immobilier" | "restauration" | "bienetre";
@@ -453,3 +593,232 @@ export const USE_CASES: {
     ],
   },
 ];
+
+/* ---------- Interface text used inside the components (kept here so the English version mirrors it). ---------- */
+
+export const UI = {
+  meta: {
+    title: "ClientX AI — Réservez votre démo du CRM IA tout-en-un",
+    description:
+      "Sites, funnels, CRM, e-mails, SMS, WhatsApp, agendas, paiements, formations et agents IA dans une seule plateforme. Démo live + audit gratuit de vos outils.",
+    ogTitle: "ClientX AI — Le CRM IA tout-en-un",
+    ogDescription: "Remplacez +20 outils et économisez plus de 15 000 € par an. Réservez votre démo gratuite.",
+    locale: "fr_FR",
+  },
+  home: "ClientX AI — accueil",
+  langSwitch: "Langue",
+  hero: {
+    line1: "Réservez votre",
+    highlight: "démo",
+    accent: "gratuite",
+    line3: "aujourd'hui.",
+    sticker: "Audit offert",
+    lead: "& recevez un audit offert de vos outils.",
+    certified: "Certifié",
+  },
+  logos: "Ils nous font confiance",
+  manifesto: {
+    intro: "Qui sommes-nous :",
+    a: "Nous réunissons",
+    stickerTools: "+20 outils en 1",
+    highlight: "vos outils",
+    b: "dans une seule plateforme.",
+    c: "De la",
+    capture: "capture",
+    stickerCosts: "0 € de coûts cachés",
+    d: "à la",
+    accent: "signature.",
+    video: "La plateforme en action",
+  },
+  video: { play: "Lire la démo vidéo", watch: "Voir la démo" },
+  modules: { eyebrow: "Capturer → Nourrir → Conclure", title: "Une plateforme,", accent: "six super-pouvoirs" },
+  mocks: {
+    capture: {
+      window: "votre-entreprise.com/offre",
+      steps: ["Page de capture", "Formulaire", "Merci"],
+      step: "Étape",
+      sent: "Formulaire envoyé",
+      added: "Nouveau prospect ajouté au CRM",
+    },
+    nurture: {
+      window: "Campagne — Nurturing nouveaux prospects",
+      steps: [
+        { ch: "E-mail", t: "Bienvenue chez nous", d: "Jour 0", rate: "Envoyé" },
+        { ch: "SMS", t: "Votre guide est prêt", d: "Jour 1", rate: "Délivré" },
+        { ch: "WhatsApp", t: "Une question ? Répondez ici", d: "Jour 3", rate: "Répondu" },
+        { ch: "Réseaux sociaux", t: "Publication programmée", d: "Jour 5", rate: "Planifiée" },
+      ],
+      reply: "« Oui, je suis intéressée ! »",
+    },
+    booking: {
+      window: "Agenda — Démos & rendez-vous",
+      days: ["Lun", "Mar", "Mer", "Jeu", "Ven"],
+      byAi: "Réservé par IA",
+      demo: "Démo",
+      botA: "« Je vous propose ",
+      botTime: "mardi à 13h",
+      botB: " pour votre démo. Je vous envoie la confirmation ? »",
+      reminder: "Rappel SMS envoyé — J-1",
+      confirmed: "Présence confirmée",
+    },
+    courses: {
+      window: "Espace membres — Académie",
+      modules: ["Module 1 — Les fondamentaux", "Module 2 — Passer à l'action", "Module 3 — Stratégies avancées"],
+      enrolled: "Nouvel apprenant inscrit",
+    },
+    close: {
+      window: "Pipeline de ventes — T4",
+      cols: ["Nouveau", "Démo", "Gagné"],
+      signed: "Devis signé électroniquement",
+      paid: "Paiement reçu · Stripe",
+    },
+    automate: {
+      window: "Workflow — Qualification automatique",
+      nodes: [
+        { t: "Déclencheur", d: "Formulaire soumis" },
+        { t: "Agent IA", d: "Qualifie le prospect" },
+        { t: "WhatsApp", d: "Message personnalisé" },
+        { t: "CRM", d: "Opportunité créée" },
+      ],
+      active: "Agent IA actif 24h/24",
+    },
+  },
+  archive: {
+    eyebrow: "Archives · Cas d'usage",
+    title: "Ouvrez le dossier de",
+    accent: "votre secteur",
+    subtitle: "Des workflows concrets, déjà éprouvés. Cliquez sur un dossier pour l'ouvrir.",
+    count: (sectors: number, cases: number) => `${sectors} secteurs · ${cases} cas d'usage`,
+    open: (sector: string) => `Ouvrir le dossier ${sector}`,
+    case: "Cas",
+    cases: (n: number) => `${n} cas d'usage`,
+    dialog: (sector: string) => `Cas d'usage — ${sector}`,
+    folder: "Dossier",
+    close: "Fermer",
+    prev: "Dossier précédent",
+    next: "Dossier suivant",
+    cta: (primary: string) => `${primary} pour ce secteur`,
+  },
+  proof: {
+    eyebrow: "Ils en parlent mieux que nous",
+    prev: "Témoignage précédent",
+    next: "Témoignage suivant",
+    item: (k: number) => `Témoignage ${k}`,
+    supportA: "Et vous n'êtes jamais seul : ",
+    supportAccent: "mise en route guidée",
+    supportB: " par e-mail et vidéos + 1 appel de 30 min, et migration simplifiée par nos eXperts.",
+  },
+  tools: {
+    eyebrow: "+20 outils vs 1 plateforme",
+    title: "Arrêtez de payer pour",
+    accent: "20 outils",
+    subtitle: "Chaque abonnement en moins, c'est une connexion, une facture et une source d'erreurs en moins.",
+    today: "Aujourd'hui",
+    subscriptions: "+20 abonnements",
+    stack: "Votre stack actuelle",
+    with: "Avec ClientX AI",
+    platform: "Une seule plateforme, pilotée par l'IA.",
+    points: ["1 abonnement, 1 connexion", "1 base de données client unifiée", "1 équipe support", "Données chiffrées, conformes RGPD"],
+    savings: "Économies estimées",
+    amount: "15 000 €",
+    perYear: "/ an",
+  },
+  pricing: {
+    eyebrow: "Tarifs",
+    title: "Combien coûte",
+    accent: "ClientX AI ?",
+    subtitle: "Au mois sans engagement, ou à l'année avec 2 mois offerts.",
+    billing: "Période de facturation",
+    currency: "Devise",
+    popular: "Le plus populaire",
+    monthlyTerms: (setup: string) => `+ ${setup} de mise en place, une seule fois · Sans engagement`,
+    yearlyTerms: (setup: string) => `2 mois offerts · + ${setup} de mise en place`,
+    choose: (name: string) => `Choisir ${name}`,
+    vat: "Prix HT, TVA 20 % en sus.",
+  },
+  faq: { eyebrow: "FAQ", title: "Vos questions,", accent: "nos réponses", other: "Une autre question ?" },
+  footer: {
+    eyebrow: "Démo live + audit gratuit",
+    title: "Prêt à tout réunir dans",
+    accent: "une seule plateforme ?",
+    text: "Un eXpert vous montre ClientX AI sur votre propre activité, et identifie ce que vous pouvez économiser.",
+    sticker: "Réponse sous 24h",
+    small: "Démo gratuite · Sans engagement",
+    tagline: "Le CRM IA tout-en-un qui remplace plus de 20 outils. Certifié ISO 9001.",
+    nav: "Navigation",
+    contact: "Contact",
+    rights: "Tous droits réservés.",
+    legal: "Mentions légales",
+    privacy: "Politique de confidentialité",
+  },
+  form: {
+    step: (n: number) => `Étape ${n} sur 2`,
+    contactTitle: "Vos coordonnées",
+    companyTitle: "Votre entreprise",
+    firstName: "Prénom",
+    lastName: "Nom",
+    workEmail: "E-mail professionnel",
+    email: "E-mail",
+    phone: "Téléphone",
+    emailPlaceholder: "sarah@entreprise.com",
+    next: "Continuer",
+    company: "Entreprise",
+    companyPlaceholder: "Nom de votre entreprise",
+    sector: "Secteur d'activité",
+    sectorPlaceholder: "Sélectionnez votre secteur",
+    teamSize: "Taille de l'équipe",
+    back: "Retour",
+    sending: "Envoi…",
+    redirecting: "Redirection…",
+    error: "L'envoi a échoué. Réessayez, ou écrivez-nous à contact@clientx.ai.",
+    privacy: "Vos données sont chiffrées et ne sont jamais revendues. En continuant, vous acceptez notre",
+    privacyPartner: "Vos données sont chiffrées et ne sont jamais revendues. En envoyant ce formulaire, vous acceptez notre",
+    privacyLink: "politique de confidentialité",
+    phoneCountry: "Pays de l'indicatif",
+    otherCountry: "Autre pays (indicatif complet)",
+    phoneNumber: "Numéro de téléphone",
+    phonePlaceholder: "Indicatif + numéro",
+    phoneFull: "Numéro complet avec l'indicatif du pays",
+    phoneDigits: (n: string, dial: string) => `${n} chiffres après +${dial}`,
+    range: (min: number, max: number) => `${min} à ${max}`,
+  },
+  partnerForm: {
+    plan: "Formule",
+    emailPlaceholder: "sarah@agence.com",
+    company: "Société (facultatif)",
+    companyPlaceholder: "Votre agence ou activité",
+    link: "Site ou réseau social (facultatif)",
+    message: "Votre audience ou vos clients (facultatif)",
+    messagePlaceholder: "Qui comptez-vous recommander ou équiper ?",
+  },
+  partnersPage: {
+    title: "ClientX Partner Program — Recommandez ou revendez le CRM ClientX",
+    description:
+      "Apporteur d'affaires (20 %) ou partenaire agence (30 %) : des commissions chaque mois, tant que vos clients restent abonnés.",
+    sticker: "Jusqu'à 30 % chaque mois",
+    benefits: { eyebrow: "Avantages", title: "Pourquoi devenir", accent: "partenaire ?" },
+    steps: { eyebrow: "Comment ça marche", title: "4 étapes pour", accent: "commencer" },
+    apply: { eyebrow: "Candidature", title: "Devenez partenaire", accent: "ClientX" },
+    applyText:
+      "Choisissez votre formule et laissez-nous vos coordonnées : nous vous envoyons votre lien et votre kit marketing.",
+  },
+  thankYou: {
+    title: "Merci — Votre demande de démo ClientX AI est envoyée",
+    titleMA: "Merci — Votre demande de démo ClientX AI (Maroc) est envoyée",
+    thanks: "Merci",
+    received: " ! Votre demande est ",
+    accent: "bien reçue",
+    next: "Voici les prochaines étapes.",
+    back: "Retour au site",
+    question: "Une question ?",
+  },
+  legal: { title: "Mentions légales — ClientX AI", privacyTitle: "Politique de confidentialité — ClientX AI" },
+};
+
+/** Labels for values sent to the CRM as they are (French in both versions). Empty: the value is its own label. */
+export const SECTOR_LABELS: Record<string, string> = {};
+export const PARTNER_PLAN_LABELS: Record<string, string> = {};
+/** Phone country names by ISO code. Empty: the French names from lib/phone.ts. */
+export const PHONE_NAMES: Record<string, string> = {};
+/** Form error messages (lib/schema.ts writes them in French). Empty: shown as they are. */
+export const ERRORS: Record<string, string> = {};

@@ -1,11 +1,12 @@
+import { copy, homeOf, type Lang } from "@/lib/i18n";
 import { Logo } from "@/components/ui";
 import { Footer } from "@/components/Footer";
 
-export function LegalPage({ title, children }: { title: string; children: React.ReactNode }) {
+export function LegalPage({ title, lang = "fr", children }: { title: string; lang?: Lang; children: React.ReactNode }) {
   return (
     <>
       <header className="container-x flex h-20 items-center">
-        <a href="/" aria-label="ClientX AI — accueil">
+        <a href={homeOf(lang)} aria-label={copy(lang).UI.home}>
           <Logo className="h-7" />
         </a>
       </header>
@@ -15,7 +16,7 @@ export function LegalPage({ title, children }: { title: string; children: React.
           {children}
         </div>
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </>
   );
 }

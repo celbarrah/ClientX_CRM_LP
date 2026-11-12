@@ -8,6 +8,9 @@ export const TRACKED_PARAMS = [
   "utm_term",
   "utm_content",
   "utm_id",
+  // Google Ads ValueTrack ({matchtype}, {network}), set in the ad's final URL suffix.
+  "matchtype",
+  "network",
   "gclid",
   "gbraid",
   "wbraid",

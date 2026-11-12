@@ -1,11 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
 import {
   BellRing, Bot, Check, CreditCard, FileSignature, GraduationCap, Mail, MessageCircle,
   MessageSquare, MousePointerClick, PlayCircle, Radio, Sparkles, Zap,
 } from "lucide-react";
 import type { ModuleKey } from "@/lib/content";
+import type { Copy } from "@/lib/i18n";
+
+type T = Copy["UI"]["mocks"];
 import { cn } from "@/lib/utils";
 
 /* ---------- shared pieces ---------- */
@@ -24,13 +26,9 @@ function Window({ title, children, className }: { title: string; children: React
   );
 }
 
-function Float({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function Float({ children, className }: { children: React.ReactNode; className?: string; delay?: number }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.3 + delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
       className={cn("absolute z-10", className)}
     >
       <div
@@ -38,7 +36,7 @@ function Float({ children, className, delay = 0 }: { children: React.ReactNode; 
       >
         {children}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -56,10 +54,10 @@ function Dot({ className }: { className?: string }) {
 
 /* ---------- module mocks ---------- */
 
-function CaptureMock() {
+function CaptureMock({ t: { capture: t } }: { t: T }) {
   return (
     <div className="relative">
-      <Window title="votre-entreprise.com/offre">
+      <Window title={t.window}>
         <div className="grid gap-5 p-5 sm:p-6">
           <div className="grid gap-2.5">
             <Bar w="38%" className="h-2.5 bg-brand/40" />
@@ -72,16 +70,13 @@ function CaptureMock() {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2.5">
-            {["Page de capture", "Formulaire", "Merci"].map((s, i) => (
+            {t.steps.map((s, i) => (
               <div key={s} className="rounded-xl border border-line bg-canvas/70 p-3">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted">Étape {i + 1}</p>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted">{t.step} {i + 1}</p>
                 <p className="mt-1 truncate text-[12px] font-medium">{s}</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: ["100%", "62%", "41%"][i] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.4, delay: 0.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  <div
+                    style={{ width: ["100%", "62%", "41%"][i] }}
                     className="h-full rounded-full bg-brand"
                   />
                 </div>
@@ -91,34 +86,26 @@ function CaptureMock() {
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <MousePointerClick className="size-4 text-brand-deep" /> Formulaire envoyé
+        <MousePointerClick className="size-4 text-brand-deep" /> {t.sent}
       </Float>
       <Float className="-bottom-5 -left-3 sm:-left-6" delay={0.4}>
-        <Dot /> Nouveau prospect ajouté au CRM
+        <Dot /> {t.added}
       </Float>
     </div>
   );
 }
 
-function NurtureMock() {
-  const steps = [
-    { icon: Mail, ch: "E-mail", t: "Bienvenue chez nous", d: "Jour 0", rate: "Envoyé" },
-    { icon: MessageSquare, ch: "SMS", t: "Votre guide est prêt", d: "Jour 1", rate: "Délivré" },
-    { icon: MessageCircle, ch: "WhatsApp", t: "Une question ? Répondez ici", d: "Jour 3", rate: "Répondu" },
-    { icon: Radio, ch: "Réseaux sociaux", t: "Publication programmée", d: "Jour 5", rate: "Planifiée" },
-  ];
+function NurtureMock({ t: { nurture: t } }: { t: T }) {
+  const icons = [Mail, MessageSquare, MessageCircle, Radio];
+  const steps = t.steps.map((s, i) => ({ ...s, icon: icons[i] }));
   return (
     <div className="relative">
-      <Window title="Campagne — Nurturing nouveaux prospects">
+      <Window title={t.window}>
         <div className="relative grid gap-3 p-5 sm:p-6">
           <div className="absolute bottom-10 left-[51px] top-10 w-px bg-line-strong sm:left-[55px]" />
           {steps.map((s, i) => (
-            <motion.div
+            <div
               key={s.ch}
-              initial={{ opacity: 0, x: 12 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 + i * 0.12 }}
               className="relative flex items-center gap-3 rounded-xl border border-line bg-canvas p-3"
             >
               <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", i === 2 ? "bg-brand text-ink" : "bg-ink text-white")}>
@@ -129,23 +116,23 @@ function NurtureMock() {
                 <p className="truncate text-[13px] font-medium">{s.t}</p>
               </div>
               <span className="hidden shrink-0 rounded-full bg-brand-soft px-2.5 py-1 text-[11px] font-medium text-brand-deep sm:block">{s.rate}</span>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <MessageCircle className="size-4 text-brand-deep" /> « Oui, je suis intéressée ! »
+        <MessageCircle className="size-4 text-brand-deep" /> {t.reply}
       </Float>
     </div>
   );
 }
 
-function BookingMock() {
-  const days = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
+function BookingMock({ t: { booking: t } }: { t: T }) {
+  const days = t.days;
   const booked = new Set(["0-1", "1-0", "1-2", "2-1", "3-0", "3-3", "4-2"]);
   return (
     <div className="relative">
-      <Window title="Agenda — Démos & rendez-vous">
+      <Window title={t.window}>
         <div className="p-5 sm:p-6">
           <div className="grid grid-cols-5 gap-2">
             {days.map((d) => (
@@ -156,12 +143,8 @@ function BookingMock() {
                 const on = booked.has(`${c}-${r}`);
                 const hl = c === 1 && r === 2;
                 return (
-                  <motion.div
+                  <div
                     key={`${c}-${r}`}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.1 + (r * 5 + c) * 0.025 }}
                     className={cn(
                       "flex h-12 flex-col justify-center rounded-lg border px-2",
                       hl ? "border-brand bg-brand text-ink shadow-glow" : on ? "border-ink bg-ink text-white" : "border-dashed border-line-strong",
@@ -170,10 +153,10 @@ function BookingMock() {
                     {(on || hl) && (
                       <>
                         <span className="text-[10px] font-medium leading-none opacity-70">{9 + r * 2}:00</span>
-                        <span className="mt-1 truncate text-[11px] font-medium leading-none">{hl ? "Réservé par IA" : "Démo"}</span>
+                        <span className="mt-1 truncate text-[11px] font-medium leading-none">{hl ? t.byAi : t.demo}</span>
                       </>
                     )}
-                  </motion.div>
+                  </div>
                 );
               }),
             )}
@@ -181,36 +164,32 @@ function BookingMock() {
           <div className="mt-4 flex items-start gap-3 rounded-xl border border-line bg-canvas/70 p-3">
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-ink text-brand"><Bot className="size-4" /></span>
             <p className="text-[13px] leading-snug text-ink-soft">
-              « Je vous propose <b className="text-ink">mardi à 13h</b> pour votre démo. Je vous envoie la confirmation ? »
+              {t.botA}<b className="text-ink">{t.botTime}</b>{t.botB}
             </p>
           </div>
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <BellRing className="size-4 text-brand-deep" /> Rappel SMS envoyé — J-1
+        <BellRing className="size-4 text-brand-deep" /> {t.reminder}
       </Float>
       <Float className="-bottom-5 -left-3 sm:-left-6" delay={0.4}>
-        <Dot /> Présence confirmée
+        <Dot /> {t.confirmed}
       </Float>
     </div>
   );
 }
 
-function CoursesMock() {
-  const mods = [
-    { t: "Module 1 — Les fondamentaux", p: 100 },
-    { t: "Module 2 — Passer à l'action", p: 72 },
-    { t: "Module 3 — Stratégies avancées", p: 24 },
-  ];
+function CoursesMock({ t: { courses: t } }: { t: T }) {
+  const mods = t.modules.map((m, i) => ({ t: m, p: [100, 72, 24][i] }));
   return (
     <div className="relative">
-      <Window title="Espace membres — Académie">
+      <Window title={t.window}>
         <div className="grid gap-4 p-5 sm:grid-cols-5 sm:p-6">
           <div className="relative grid aspect-video place-items-center overflow-hidden rounded-xl bg-ink sm:col-span-2 sm:aspect-auto">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgb(50_220_50/0.35),transparent_60%)]" />
             <PlayCircle className="relative size-10 text-white" strokeWidth={1.4} />
             <span className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
-              <span className="size-1.5 animate-pulse rounded-full bg-white" /> Live
+              <span className="size-1.5 rounded-full bg-white" /> Live
             </span>
           </div>
           <div className="grid gap-2.5 sm:col-span-3">
@@ -221,11 +200,8 @@ function CoursesMock() {
                   <span className="font-mono text-[10px] text-muted">{m.p}%</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${m.p}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.3, delay: 0.3 + i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  <div
+                    style={{ width: `${m.p}%` }}
                     className="h-full rounded-full bg-brand"
                   />
                 </div>
@@ -235,21 +211,22 @@ function CoursesMock() {
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <GraduationCap className="size-4 text-brand-deep" /> Nouvel apprenant inscrit
+        <GraduationCap className="size-4 text-brand-deep" /> {t.enrolled}
       </Float>
     </div>
   );
 }
 
-function CloseMock() {
-  const cols = [
-    { t: "Nouveau", deals: [["Groupe Atlas", "3 200 €"], ["Studio Nova", "1 450 €"]] },
-    { t: "Démo", deals: [["Immo Prestige", "6 900 €"], ["Clinique Azur", "2 800 €"]] },
-    { t: "Gagné", deals: [["Auto Premium", "4 900 €"]] },
+function CloseMock({ t: { close: t } }: { t: T }) {
+  const deals = [
+    [["Groupe Atlas", "3 200 €"], ["Studio Nova", "1 450 €"]],
+    [["Immo Prestige", "6 900 €"], ["Clinique Azur", "2 800 €"]],
+    [["Auto Premium", "4 900 €"]],
   ];
+  const cols = t.cols.map((c, i) => ({ t: c, deals: deals[i] }));
   return (
     <div className="relative">
-      <Window title="Pipeline de ventes — T4">
+      <Window title={t.window}>
         <div className="grid grid-cols-3 gap-2.5 p-4 sm:p-6">
           {cols.map((c, ci) => (
             <div key={c.t} className="rounded-xl bg-canvas/80 p-2">
@@ -259,17 +236,13 @@ function CloseMock() {
               </div>
               <div className="grid gap-2">
                 {c.deals.map(([n, v], di) => (
-                  <motion.div
+                  <div
                     key={n}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 + ci * 0.12 + di * 0.08 }}
                     className={cn("rounded-lg border bg-canvas p-2.5", ci === 2 ? "border-brand shadow-[0_0_0_3px_rgb(50_220_50/0.15)]" : "border-line")}
                   >
                     <p className="truncate text-[11px] font-medium sm:text-[12px]">{n}</p>
                     <p className={cn("mt-1 text-[11px] font-semibold tabular-nums", ci === 2 ? "text-brand-deep" : "text-ink-soft")}>{v}</p>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -277,35 +250,32 @@ function CloseMock() {
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <FileSignature className="size-4 text-brand-deep" /> Devis signé électroniquement
+        <FileSignature className="size-4 text-brand-deep" /> {t.signed}
       </Float>
       <Float className="-bottom-5 -left-3 sm:-left-6" delay={0.4}>
-        <CreditCard className="size-4 text-brand-deep" /> Paiement reçu · Stripe
+        <CreditCard className="size-4 text-brand-deep" /> {t.paid}
       </Float>
     </div>
   );
 }
 
-function AutomateMock() {
-  const nodes = [
-    { icon: Zap, t: "Déclencheur", d: "Formulaire soumis", tone: "ink" },
-    { icon: Bot, t: "Agent IA", d: "Qualifie le prospect", tone: "brand" },
-    { icon: MessageCircle, t: "WhatsApp", d: "Message personnalisé", tone: "white" },
-    { icon: Sparkles, t: "CRM", d: "Opportunité créée", tone: "white" },
+function AutomateMock({ t: { automate: t } }: { t: T }) {
+  const look = [
+    { icon: Zap, tone: "ink" },
+    { icon: Bot, tone: "brand" },
+    { icon: MessageCircle, tone: "white" },
+    { icon: Sparkles, tone: "white" },
   ];
+  const nodes = t.nodes.map((n, i) => ({ ...n, ...look[i] }));
   return (
     <div className="relative">
-      <Window title="Workflow — Qualification automatique">
+      <Window title={t.window}>
         <div className="relative grid gap-3 bg-grid p-5 sm:p-6">
           <div className="absolute bottom-10 left-1/2 top-10 w-px -translate-x-1/2 bg-line-strong">
           </div>
           {nodes.map((n, i) => (
-            <motion.div
+            <div
               key={n.t}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 + i * 0.12 }}
               className={cn(
                 "relative mx-auto flex w-full max-w-xs items-center gap-3 rounded-xl border p-3",
                 n.tone === "ink" ? "border-ink bg-ink text-white" : n.tone === "brand" ? "border-brand bg-brand text-ink" : "border-line bg-canvas",
@@ -318,18 +288,18 @@ function AutomateMock() {
                 <p className="font-mono text-[10px] uppercase tracking-wider opacity-60">{n.t}</p>
                 <p className="text-[13px] font-medium">{n.d}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </Window>
       <Float className="-right-3 -top-5 sm:-right-6">
-        <Bot className="size-4 text-brand-deep" /> Agent IA actif 24h/24
+        <Bot className="size-4 text-brand-deep" /> {t.active}
       </Float>
     </div>
   );
 }
 
-const MOCKS: Record<ModuleKey, () => React.JSX.Element> = {
+const MOCKS: Record<ModuleKey, (p: { t: T }) => React.JSX.Element> = {
   capture: CaptureMock,
   nurture: NurtureMock,
   booking: BookingMock,
@@ -338,7 +308,7 @@ const MOCKS: Record<ModuleKey, () => React.JSX.Element> = {
   automate: AutomateMock,
 };
 
-export function ModuleMock({ name }: { name: ModuleKey }) {
+export function ModuleMock({ name, t }: { name: ModuleKey; t: T }) {
   const Mock = MOCKS[name];
-  return <Mock />;
+  return <Mock t={t} />;
 }

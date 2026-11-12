@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "lenis/dist/lenis.css";
 
 @theme {
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
@@ -37,6 +36,10 @@
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
   }
+  @keyframes tab-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
   @keyframes pulse-dot {
     0%, 100% { box-shadow: 0 0 0 0 rgb(50 220 50 / 0.55); }
     50% { box-shadow: 0 0 0 6px rgb(50 220 50 / 0); }
@@ -45,6 +48,9 @@
 
 @layer base {
   html {
+    /* Native scrolling (no JS smooth-scroll). Anchor jumps clear the fixed header. */
+    scroll-padding-top: 88px;
+    scroll-behavior: smooth;
     background: var(--color-canvas);
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;

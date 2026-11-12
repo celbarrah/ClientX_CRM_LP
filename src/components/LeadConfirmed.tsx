@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { trackLead } from "@/components/Analytics";
 
 /** Personal greeting + conversion event, only when the visitor arrives from a real submission. */
-export function LeadConfirmed() {
+export function LeadConfirmed({ market }: { market: "MA" | "global" }) {
   const [name, setName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,8 +16,8 @@ export function LeadConfirmed() {
     } catch {}
     if (!lead) return;
     setName(lead.firstName ?? null);
-    trackLead({ sector: lead.sector, teamSize: lead.teamSize });
-  }, []);
+    trackLead({ sector: lead.sector, teamSize: lead.teamSize, market });
+  }, [market]);
 
   return name ? <>, {name}</> : null;
 }

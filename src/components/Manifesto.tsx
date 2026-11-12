@@ -1,9 +1,11 @@
-import { QUESTIONS, CTA } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { Accent, Button, Highlight, Reveal, Sticker, Target } from "@/components/ui";
 import { VideoPlayer } from "@/components/VideoPlayer";
 
 /** Editorial manifesto: replaces the value prop, stats and questions blocks in one section. */
-export function Manifesto() {
+export function Manifesto({ lang = "fr" }: { lang?: Lang }) {
+  const { QUESTIONS, CTA, UI } = copy(lang);
+  const t = UI.manifesto;
   return (
     <section id="plateforme" className="relative isolate scroll-mt-24 overflow-hidden py-24 sm:py-32">
       <div className="absolute inset-0 -z-10 bg-paper" />
@@ -13,25 +15,25 @@ export function Manifesto() {
       <div className="container-x">
         <div className="mx-auto max-w-4xl">
           <Reveal>
-            <p className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">Qui sommes-nous :</p>
+            <p className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">{t.intro}</p>
           </Reveal>
 
           <Reveal delay={0.1}>
             <p className="mt-12 text-[2.6rem] font-medium leading-[1.12] tracking-[-0.045em] text-ink sm:text-6xl lg:text-[4.6rem]">
-              Nous réunissons{" "}
+              {t.a}{" "}
               <Sticker rotate={-5} delay={0.3} className="relative -top-3 mx-1 align-middle sm:-top-5">
-                +20 outils en 1
+                {t.stickerTools}
               </Sticker>{" "}
-              <Highlight className="font-bold italic">vos outils</Highlight> dans une seule plateforme.{" "}
+              <Highlight className="font-bold italic">{t.highlight}</Highlight> {t.b}{" "}
               <span className="relative inline-block">
                 <Target className="absolute -right-4 -top-6 size-7 sm:-right-8 sm:-top-8 sm:size-8" />
               </span>
               <br className="hidden sm:block" />
-              De la <span className="font-bold italic">capture</span>{" "}
+              {t.c} <span className="font-bold italic">{t.capture}</span>{" "}
               <Sticker rotate={4} delay={0.5} className="relative -top-2 mx-1 align-middle sm:-top-4">
-                0 € de coûts cachés
+                {t.stickerCosts}
               </Sticker>{" "}
-              à la <Accent>signature.</Accent>{" "}
+              {t.d} <Accent>{t.accent}</Accent>{" "}
               <Sticker rotate={-3} delay={0.7} dark className="relative -top-2 align-middle sm:-top-4">
                 ISO 9001
               </Sticker>
@@ -41,9 +43,9 @@ export function Manifesto() {
 
         <Reveal delay={0.1} className="relative mx-auto mt-20 max-w-6xl">
           <div className="absolute -left-3 -top-5 z-10 sm:-left-6">
-            <Sticker rotate={-7}>La plateforme en action</Sticker>
+            <Sticker rotate={-7}>{t.video}</Sticker>
           </div>
-          <VideoPlayer />
+          <VideoPlayer play={UI.video.play} watch={UI.video.watch} />
         </Reveal>
 
         <div className="mx-auto mt-20 grid max-w-6xl grid-cols-1 divide-y divide-line-strong border-y border-line-strong md:grid-cols-3 md:divide-x md:divide-y-0">

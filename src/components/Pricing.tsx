@@ -1,17 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Check, Sparkles } from "lucide-react";
-import { PRICING, CTA, CURRENCIES, type Currency } from "@/lib/content";
+import { Check, Minus, Sparkles, Wallet } from "lucide-react";
+import type { Billing, Currency } from "@/lib/content";
+import { copy, type Lang } from "@/lib/i18n";
 import { detectCountry } from "@/lib/geo";
 import { Button, Reveal, SectionHeading } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-export function Pricing() {
-  // Everyone sees euros. Visitors in Morocco get MAD by default plus a switch.
+/** Pill switch shared by the billing period and the currency. */
+function Switch<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: Record<T, { label: string }>; onChange: (v: T) => void }) {
+  return (
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line-strong bg-surface p-1">
+      {(Object.keys(options) as T[]).map((o) => (
+        <button
+          key={o}
+          type="button"
+          role="radio"
+          aria-checked={value === o}
+          onClick={() => onChange(o)}
+          className={cn("rounded-full px-5 py-2 text-[13px] font-medium", value === o ? "bg-ink text-white" : "text-ink-soft")}
+        >
+          {options[o].label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Pricing({ lang = "fr" }: { lang?: Lang }) {
+  const { PRICING, CTA, CURRENCIES, BILLING, UI } = copy(lang);
+  const t = UI.pricing;
+  // Everyone sees euros. Visitors in Morocco get DH by default plus a switch.
   const [inMorocco, setInMorocco] = useState(false);
   const [currency, setCurrency] = useState<Currency>("eur");
+  const [billing, setBilling] = useState<Billing>("monthly");
 
   useEffect(() => {
     detectCountry().then((c) => {
@@ -22,40 +45,30 @@ export function Pricing() {
   }, []);
 
   const symbol = CURRENCIES[currency].symbol;
+  // France pays online with the payment links; Morocco books a demo and pays by invoice afterwards.
+  const buysOnline = currency === "eur";
+  const setup = `${PRICING.setup[currency]} ${symbol}`;
+  const terms =
+    billing === "monthly"
+      ? t.monthlyTerms(setup)
+      : t.yearlyTerms(setup); // the setup fee is charged on yearly plans too (France and Morocco)
 
   return (
     <section id="tarifs" className="scroll-mt-24 py-20 sm:py-28">
       <div className="container-x">
         <SectionHeading
-          eyebrow="Tarifs"
-          title="Combien coûte"
-          accent="ClientX AI ?"
-          subtitle={`Des formules annuelles simples et transparentes. 0 ${symbol} de coûts cachés.`}
+          eyebrow={t.eyebrow}
+          title={t.title}
+          accent={t.accent}
+          subtitle={t.subtitle}
         />
 
-        {inMorocco && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-10 flex justify-center">
-            <div role="radiogroup" aria-label="Devise" className="inline-flex rounded-full border border-line-strong bg-surface p-1">
-              {(Object.keys(CURRENCIES) as Currency[]).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={currency === c}
-                  onClick={() => setCurrency(c)}
-                  className="relative rounded-full px-5 py-2 text-[13px] font-medium transition-colors"
-                >
-                  {currency === c && (
-                    <motion.span layoutId="currency-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 400, damping: 32 }} />
-                  )}
-                  <span className={cn("relative", currency === c ? "text-white" : "text-ink-soft")}>{CURRENCIES[c].label}</span>
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Switch label={t.billing} value={billing} options={BILLING} onChange={setBilling} />
+          {inMorocco && <Switch label={t.currency} value={currency} options={CURRENCIES} onChange={setCurrency} />}
+        </div>
 
-        <div className={cn("grid items-stretch gap-4 lg:grid-cols-3", inMorocco ? "mt-12" : "mt-16")}>
+        <div className="mt-12 grid items-stretch gap-4 lg:grid-cols-3">
           {PRICING.plans.map((p, i) => (
             <Reveal
               key={p.name}
@@ -73,46 +86,42 @@ export function Pricing() {
                   <h3 className="font-mono text-[12px] uppercase tracking-[0.16em]">{p.name}</h3>
                   {p.popular && (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-[12px] font-semibold text-ink">
-                      <Sparkles className="size-3.5" /> Le plus populaire
+                      <Sparkles className="size-3.5" /> {t.popular}
                     </span>
                   )}
                 </div>
-                <p className={cn("mt-3 text-[15px]", p.popular ? "text-white/60" : "text-muted")}>{p.tagline}</p>
-                <p className="mt-8 flex items-baseline gap-1.5 overflow-hidden">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={currency}
-                      initial={{ y: 18, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -18, opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex items-baseline gap-1.5 whitespace-nowrap"
-                    >
-                      <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[currency]}</span>
-                      <span className="text-2xl font-semibold">{symbol}</span>
-                    </motion.span>
-                  </AnimatePresence>
-                  <span className={cn("ml-1 text-sm", p.popular ? "text-white/50" : "text-muted")}>/ an</span>
+                <p className={cn("mt-3 text-[15px] italic", p.popular ? "text-white/70" : "text-ink-soft")}>{p.problem}</p>
+                <p className="mt-8 flex flex-wrap items-baseline gap-1.5">
+                  <span className="flex items-baseline gap-1.5 whitespace-nowrap">
+                    <span className="text-5xl font-semibold tracking-[-0.05em] tabular-nums sm:text-6xl">{p.price[billing][currency]}</span>
+                    <span className="text-2xl font-semibold">{symbol}</span>
+                  </span>
+                  <span className={cn("ml-1 text-sm", p.popular ? "text-white/50" : "text-muted")}>/ {BILLING[billing].unit}</span>
                 </p>
+                <p className={cn("mt-3 text-[13px]", p.popular ? "text-white/60" : "text-muted")}>{terms}</p>
                 <div className={cn("my-8 h-px", p.popular ? "bg-white/10" : "bg-line")} />
+                {p.intro && <p className={cn("mb-3.5 text-[14px] font-medium", p.popular ? "text-white/70" : "text-ink-soft")}>{p.intro}</p>}
                 <ul className="grid gap-3.5 text-[15px]">
-                  {[...p.features, ...PRICING.included].map((f, fi) => (
+                  {p.features.map((f) => (
                     <li key={f} className="flex items-center gap-3">
-                      <span
-                        className={cn(
-                          "grid size-5 shrink-0 place-items-center rounded-full",
-                          fi < p.features.length ? "bg-brand text-ink" : p.popular ? "bg-white/10 text-brand" : "bg-brand-soft text-brand-deep",
-                        )}
-                      >
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand text-ink">
                         <Check className="size-3" strokeWidth={3} />
                       </span>
-                      <span className={cn(fi < p.features.length && "font-medium")}>{f}</span>
+                      <span className="font-medium">{f}</span>
                     </li>
                   ))}
+                  {p.note && (
+                    <li className={cn("flex items-center gap-3", p.popular ? "text-white/50" : "text-muted")}>
+                      <span className={cn("grid size-5 shrink-0 place-items-center rounded-full", p.popular ? "bg-white/10" : "bg-line")}>
+                        <Minus className="size-3" strokeWidth={3} />
+                      </span>
+                      {p.note}
+                    </li>
+                  )}
                 </ul>
                 <div className="mt-auto pt-10">
-                  <Button href="#demo" variant={p.popular ? "brand" : "dark"} className="w-full justify-between">
-                    {CTA.primary}
+                  <Button href={buysOnline ? p.paymentLinks[billing] : "#demo"} variant={p.popular ? "brand" : "dark"} className="w-full justify-between">
+                    {buysOnline ? t.choose(p.name) : CTA.primary}
                   </Button>
                 </div>
               </div>
@@ -122,10 +131,11 @@ export function Pricing() {
 
         <Reveal className="mx-auto mt-12 flex max-w-2xl flex-col items-center gap-3 rounded-2xl border border-line bg-surface px-6 py-5 text-center sm:flex-row sm:text-left">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-ink text-brand">
-            <Sparkles className="size-4" />
+            <Wallet className="size-4" />
           </span>
           <p className="text-[14px] leading-relaxed text-ink-soft">
-            <span className="font-medium text-ink">Tous les plans sont facturés annuellement.</span> {PRICING.aiNote}
+            <span className="font-medium text-ink">{PRICING.credits.offer}</span> {PRICING.credits.text}
+            {!buysOnline && <span className="mt-1 block font-medium text-ink">{t.vat}</span>}
           </p>
         </Reveal>
       </div>
